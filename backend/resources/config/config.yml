@@ -1,0 +1,6 @@
+database:
+  uri: "mongodb://localhost:27017"
+  name: "home-management"
+
+server:
+  listening: "0.0.0.0:8080"
