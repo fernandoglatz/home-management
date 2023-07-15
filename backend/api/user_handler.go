@@ -1,11 +1,11 @@
-package handlers
+package api
 
 import (
 	"context"
 	"net/http"
 
-	"github.com/fernandoglatz/home-management/db"
 	"github.com/fernandoglatz/home-management/models"
+	"github.com/fernandoglatz/home-management/repositories"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,7 +19,8 @@ func CreateUser(c *gin.Context) {
 	}
 
 	// Insert user into MongoDB
-	err := db.InsertUser(context.Background(), &user)
+	repository := repositories.NewRepository[*models.User]()
+	err := repository.Insert(context.Background(), &user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create user: " + err.Error()})
 		return
@@ -34,7 +35,8 @@ func GetUser(c *gin.Context) {
 	userID := c.Param("id")
 
 	// Find user in MongoDB
-	user, err := db.FindUserByID(context.Background(), userID)
+	repository := repositories.NewRepository[*models.User]()
+	user, err := repository.FindByID(context.Background(), userID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
 		return
@@ -47,7 +49,8 @@ func GetUser(c *gin.Context) {
 func GetAllUsers(c *gin.Context) {
 
 	// Find user in MongoDB
-	users, err := db.GetAllUsers(context.Background())
+	repository := repositories.NewRepository[*models.User]()
+	users, err := repository.FindAll(context.Background())
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -70,7 +73,8 @@ func UpdateUser(c *gin.Context) {
 
 	// Update user in MongoDB
 	user.ID = userID // Set the user ID in the struct
-	err := db.UpdateUser(context.Background(), &user)
+	repository := repositories.NewRepository[*models.User]()
+	err := repository.Update(context.Background(), &user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update user: " + err.Error()})
 		return
@@ -84,8 +88,8 @@ func DeleteUser(c *gin.Context) {
 	// Get user ID from request parameters
 	userID := c.Param("id")
 
-	// Delete user from MongoDB
-	err := db.DeleteUser(context.Background(), userID)
+	repository := repositories.NewRepository[*models.User]()
+	err := repository.Delete(context.Background(), userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
