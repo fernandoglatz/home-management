@@ -15,9 +15,12 @@ func Setup() error {
 	router.POST("/api/"+userPath, userController.Create)
 	router.GET("/api/"+userPath, userController.GetAll)
 	router.GET("/api/"+userPath+"/:id", userController.Get)
+	router.HEAD("/api/"+userPath+"/:id", userController.Head)
 	router.PUT("/api/"+userPath+"/:id", userController.Update)
 	router.PATCH("/api/"+userPath+"/:id", userController.Patch)
 	router.DELETE("/api/"+userPath+"/:id", userController.Delete)
+
+	//TODO Fernando OPTIONS implement
 
 	listening := configs.ApplicationConfig.Server.Listening
 

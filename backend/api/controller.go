@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"reflect"
 	"strings"
 
 	"github.com/fernandoglatz/home-management/api/dto"
@@ -87,11 +88,12 @@ func (controller *Controller[T]) Update(c *gin.Context) {
 }
 
 func (controller *Controller[T]) Patch(c *gin.Context) {
-	var entity T
 	id := c.Param("id")
-	if err := c.ShouldBindJSON(&entity); err != nil {
+
+	var jsonData map[string]interface{}
+	err := c.ShouldBindJSON(&jsonData)
+	if err != nil {
 		createResponse(c, http.StatusBadRequest, "Bad JSON received", err)
-		return
 	}
 
 	service := controller.service
@@ -108,14 +110,19 @@ func (controller *Controller[T]) Patch(c *gin.Context) {
 		return
 	}
 
-	createdAt := entity.GetCreatedAt()
+	entityValue := reflect.ValueOf(entity).Elem()
+	entityType := reflect.TypeOf(entity).Elem()
+	for i := 0; i < entityType.NumField(); i++ {
+		fieldType := entityType.Field(i)
+		fieldValue := entityValue.Field(i)
+		fieldJsonTag := fieldType.Tag.Get("json")
+		jsonTag := strings.Replace(fieldJsonTag, ",omitempty", "", -1)
 
-	err = c.Bind(entity)
-	if err != nil {
-		createResponse(c, http.StatusInternalServerError, "Failed to patch a entry in "+entityName, err)
+		value := jsonData[jsonTag]
+		if value != nil {
+			fieldValue.Set(reflect.ValueOf(value))
+		}
 	}
-
-	entity.SetCreatedAt(createdAt)
 
 	err = service.Save(entity)
 	if err != nil {
@@ -157,6 +164,26 @@ func (controller *Controller[T]) Delete(c *gin.Context) {
 	}
 
 	createResponse(c, http.StatusOK, "Deleted entry in "+entityName, nil)
+}
+
+func (controller *Controller[T]) Head(c *gin.Context) {
+	id := c.Param("id")
+
+	service := controller.service
+	entityName := service.BaseEntity.GetEntityName()
+
+	_, err := service.FindByID(id)
+	if err != nil {
+		if strings.Contains(err.Error(), "no documents") {
+			createResponse(c, http.StatusNotFound, "Entry not found in "+entityName, nil)
+			return
+		}
+
+		createResponse(c, http.StatusInternalServerError, "Failed to find a entry in "+entityName, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{})
 }
 
 func (controller *Controller[T]) Get(c *gin.Context) {
