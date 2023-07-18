@@ -30,7 +30,7 @@ func (repository *Repository[T]) Insert(ctx context.Context, entity T) error {
 	return err
 }
 
-func (repository *Repository[T]) Update(ctx context.Context, entity models.IEntity) error {
+func (repository *Repository[T]) Update(ctx context.Context, entity T) error {
 	filter := bson.M{"id": entity.GetID}
 
 	collection := GetCollection(repository.baseEntity)
@@ -38,7 +38,8 @@ func (repository *Repository[T]) Update(ctx context.Context, entity models.IEnti
 	return err
 }
 
-func (repository *Repository[T]) Delete(ctx context.Context, id string) error {
+func (repository *Repository[T]) Delete(ctx context.Context, entity T) error {
+	id := entity.GetID()
 	collection := GetCollection(repository.baseEntity)
 	_, err := collection.DeleteOne(ctx, bson.M{"id": id})
 	return err
@@ -62,6 +63,7 @@ func (repository *Repository[T]) FindAll(ctx context.Context) ([]T, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	defer cursor.Close(ctx)
 
 	var values []T = []T{}

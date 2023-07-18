@@ -6,6 +6,7 @@ import (
 
 	"github.com/fernandoglatz/home-management/models"
 	"github.com/fernandoglatz/home-management/repositories"
+	"github.com/fernandoglatz/home-management/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,8 +20,8 @@ func CreateUser(c *gin.Context) {
 	}
 
 	// Insert user into MongoDB
-	repository := repositories.NewRepository[*models.User]()
-	err := repository.Insert(context.Background(), &user)
+	service := services.NewService[*models.User]()
+	err := service.Save(context.Background(), &user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create user: " + err.Error()})
 		return
@@ -73,8 +74,8 @@ func UpdateUser(c *gin.Context) {
 
 	// Update user in MongoDB
 	user.ID = userID // Set the user ID in the struct
-	repository := repositories.NewRepository[*models.User]()
-	err := repository.Update(context.Background(), &user)
+	service := services.NewService[*models.User]()
+	err := service.Save(context.Background(), &user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update user: " + err.Error()})
 		return
@@ -89,7 +90,14 @@ func DeleteUser(c *gin.Context) {
 	userID := c.Param("id")
 
 	repository := repositories.NewRepository[*models.User]()
-	err := repository.Delete(context.Background(), userID)
+
+	user, err := repository.FindByID(context.Background(), userID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
+		return
+	}
+
+	err = repository.Delete(context.Background(), user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
