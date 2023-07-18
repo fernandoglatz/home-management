@@ -9,7 +9,7 @@ type Entity struct {
 }
 
 type IEntity interface {
-	GetCollectionName() string
+	GetEntityName() string
 
 	GetID() string
 	SetID(string)

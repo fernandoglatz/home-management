@@ -19,46 +19,52 @@ func NewRepository[T models.IEntity]() *Repository[T] {
 	return &Repository[T]{}
 }
 
-func (repository *Repository[T]) Insert(ctx context.Context, entity T) error {
+func (repository *Repository[T]) Insert(entity T) error {
 	uuidObj, err := uuid.NewRandom()
 	uuidStr := uuidObj.String()
 	id := strings.Replace(uuidStr, "-", "", -1)
 	entity.SetID(id)
 
 	collection := GetCollection(repository.baseEntity)
-	_, err = collection.InsertOne(ctx, entity)
+	_, err = collection.InsertOne(context.Background(), entity)
 	return err
 }
 
-func (repository *Repository[T]) Update(ctx context.Context, entity T) error {
-	filter := bson.M{"id": entity.GetID}
-
-	collection := GetCollection(repository.baseEntity)
-	_, err := collection.ReplaceOne(ctx, filter, entity)
-	return err
-}
-
-func (repository *Repository[T]) Delete(ctx context.Context, entity T) error {
+func (repository *Repository[T]) Update(entity T) error {
 	id := entity.GetID()
+	filter := bson.M{"id": id}
 	collection := GetCollection(repository.baseEntity)
-	_, err := collection.DeleteOne(ctx, bson.M{"id": id})
+
+	_, err := collection.ReplaceOne(context.Background(), filter, entity)
 	return err
 }
 
-func (repository *Repository[T]) FindByID(ctx context.Context, id string) (T, error) {
-	var value T
+func (repository *Repository[T]) Delete(entity T) error {
+	id := entity.GetID()
+	filter := bson.M{"id": id}
 	collection := GetCollection(repository.baseEntity)
 
-	err := collection.FindOne(ctx, bson.M{"id": id}).Decode(&value)
+	_, err := collection.DeleteOne(context.Background(), filter)
+	return err
+}
+
+func (repository *Repository[T]) FindByID(id string) (T, error) {
+	var value T
+
+	filter := bson.M{"id": id}
+	collection := GetCollection(repository.baseEntity)
+
+	err := collection.FindOne(context.Background(), filter).Decode(&value)
 	if err != nil {
 		return value, err
 	}
 	return value, nil
 }
 
-func (repository *Repository[T]) FindAll(ctx context.Context) ([]T, error) {
+func (repository *Repository[T]) FindAll() ([]T, error) {
 	collection := GetCollection(repository.baseEntity)
 
+	ctx := context.Background()
 	cursor, err := collection.Find(ctx, bson.D{})
 	if err != nil {
 		return nil, err
@@ -80,5 +86,5 @@ func (repository *Repository[T]) FindAll(ctx context.Context) ([]T, error) {
 }
 
 func GetCollection(ientity models.IEntity) *mongo.Collection {
-	return utils.GetMongoDbCollection(ientity.GetCollectionName())
+	return utils.GetMongoDbCollection(ientity.GetEntityName())
 }

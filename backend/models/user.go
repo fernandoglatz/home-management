@@ -8,7 +8,7 @@ type User struct {
 	Name   string `json:"name,omitempty" bson:"name,omitempty" binding:"required"`
 }
 
-func (user *User) GetCollectionName() string {
+func (user *User) GetEntityName() string {
 	return "users"
 }
 

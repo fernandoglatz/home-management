@@ -1,7 +1,6 @@
 package services
 
 import (
-	"context"
 	"time"
 
 	"github.com/fernandoglatz/home-management/models"
@@ -9,7 +8,7 @@ import (
 )
 
 type Service[T models.IEntity] struct {
-	baseEntity T
+	BaseEntity T
 	repository *repositories.Repository[T]
 }
 
@@ -19,7 +18,7 @@ func NewService[T models.IEntity]() *Service[T] {
 	return service
 }
 
-func (service *Service[T]) Save(ctx context.Context, entity T) error {
+func (service *Service[T]) Save(entity T) error {
 	var err error
 
 	repository := service.repository
@@ -33,25 +32,25 @@ func (service *Service[T]) Save(ctx context.Context, entity T) error {
 	}
 
 	if id == "" {
-		err = repository.Insert(ctx, entity)
+		err = repository.Insert(entity)
 	} else {
-		err = repository.Update(ctx, entity)
+		err = repository.Update(entity)
 	}
 
 	return err
 }
 
-func (service *Service[T]) Delete(ctx context.Context, entity T) error {
+func (service *Service[T]) Delete(entity T) error {
 	repository := service.repository
-	return repository.Delete(ctx, entity)
+	return repository.Delete(entity)
 }
 
-func (service *Service[T]) FindByID(ctx context.Context, id string) (T, error) {
+func (service *Service[T]) FindByID(id string) (T, error) {
 	repository := service.repository
-	return repository.FindByID(ctx, id)
+	return repository.FindByID(id)
 }
 
-func (service *Service[T]) FindAll(ctx context.Context, id string) ([]T, error) {
+func (service *Service[T]) FindAll() ([]T, error) {
 	repository := service.repository
-	return repository.FindAll(ctx)
+	return repository.FindAll()
 }
