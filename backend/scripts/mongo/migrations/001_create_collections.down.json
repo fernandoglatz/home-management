@@ -1,6 +1,14 @@
 [
-    {
-      "drop": "users"
-    }
-  ]
-  
+  {
+    "drop": "users"
+  },
+  {
+    "drop": "homes"
+  },
+  {
+    "drop": "events"
+  },
+  {
+    "drop": "devices"
+  }
+]

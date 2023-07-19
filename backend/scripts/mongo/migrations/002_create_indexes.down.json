@@ -1,6 +1,18 @@
 [
   {
     "dropIndexes": "users",
-    "indexes": ["users_id", "users_email"]
+    "indexes": ["id", "email"]
+  },
+  {
+    "dropIndexes": "homes",
+    "indexes": ["id"]
+  },
+  {
+    "dropIndexes": "events",
+    "indexes": ["id"]
+  },
+  {
+    "dropIndexes": "devices",
+    "indexes": ["id"]
   }
 ]

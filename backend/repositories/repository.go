@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/fernandoglatz/home-management/models"
-	"github.com/fernandoglatz/home-management/utils"
+	"github.com/fernandoglatz/home-management/backend/models"
+	"github.com/fernandoglatz/home-management/backend/utils"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,8 +15,8 @@ type Repository[T models.IEntity] struct {
 	baseEntity T
 }
 
-func NewRepository[T models.IEntity]() *Repository[T] {
-	return &Repository[T]{}
+func NewRepository[T models.IEntity]() Repository[T] {
+	return Repository[T]{}
 }
 
 func (repository *Repository[T]) Insert(entity T) error {
@@ -86,5 +86,5 @@ func (repository *Repository[T]) FindAll() ([]T, error) {
 }
 
 func GetCollection(ientity models.IEntity) *mongo.Collection {
-	return utils.GetMongoDbCollection(ientity.GetEntityName())
+	return utils.GetMongoDbCollection(ientity.GetCollectionName())
 }

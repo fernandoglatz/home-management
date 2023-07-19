@@ -1,5 +1,14 @@
 [
   {
     "create": "users"
+  },
+  {
+    "create": "homes"
+  },
+  {
+    "create": "events"
+  },
+  {
+    "create": "devices"
   }
 ]

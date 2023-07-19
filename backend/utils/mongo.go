@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/fernandoglatz/home-management/configs"
+	"github.com/fernandoglatz/home-management/backend/configs"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/mongodb"
 	_ "github.com/golang-migrate/migrate/v4/source/file"

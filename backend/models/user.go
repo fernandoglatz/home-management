@@ -4,11 +4,11 @@ import "time"
 
 type User struct {
 	Entity `bson:",inline"`
-	Email  string `json:"email,omitempty" bson:"email,omitempty" binding:"required,email"`
-	Name   string `json:"name,omitempty" bson:"name,omitempty" binding:"required"`
+	Email  string `json:"email,omitempty" bson:"email,omitempty"`
+	Name   string `json:"name,omitempty" bson:"name,omitempty"`
 }
 
-func (user *User) GetEntityName() string {
+func (user *User) GetCollectionName() string {
 	return "users"
 }
 

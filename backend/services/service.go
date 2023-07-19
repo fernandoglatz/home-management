@@ -3,19 +3,19 @@ package services
 import (
 	"time"
 
-	"github.com/fernandoglatz/home-management/models"
-	"github.com/fernandoglatz/home-management/repositories"
+	"github.com/fernandoglatz/home-management/backend/models"
+	"github.com/fernandoglatz/home-management/backend/repositories"
 )
 
 type Service[T models.IEntity] struct {
 	BaseEntity T
-	repository *repositories.Repository[T]
+	repository repositories.Repository[T]
 }
 
-func NewService[T models.IEntity]() *Service[T] {
-	service := &Service[T]{}
-	service.repository = repositories.NewRepository[T]()
-	return service
+func NewService[T models.IEntity]() Service[T] {
+	return Service[T]{
+		repository: repositories.NewRepository[T](),
+	}
 }
 
 func (service *Service[T]) Save(entity T) error {
