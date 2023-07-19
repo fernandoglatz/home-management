@@ -10,6 +10,8 @@ import (
 
 func Setup() error {
 	router := gin.Default()
+	router.Use(CORSMiddleware())
+
 	routerV1 := router.Group("/api/v1")
 
 	userController := NewUserController()
@@ -60,4 +62,19 @@ func Setup() error {
 
 	listening := configs.ApplicationConfig.Server.Listening
 	return router.Run(listening)
+}
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "http://localhost:3000")
+		c.Header("Access-Control-Allow-Headers", "*")
+		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, HEAD, PATCH")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
 }

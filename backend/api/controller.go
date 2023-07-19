@@ -247,7 +247,7 @@ func (controller *Controller[T, D]) GetAll(c *gin.Context) {
 
 func (controller *Controller[T, D]) Options(c *gin.Context) {
 	c.Header("Allow", "GET, POST, PUT, PATCH,  DELETE, HEAD, OPTIONS")
-	c.Status(http.StatusOK)
+	c.Status(http.StatusNoContent)
 }
 
 func createResponse(c *gin.Context, httpStatus int, message string, err error) {
