@@ -66,7 +66,8 @@ func Setup() error {
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "http://localhost:3000")
+		allowOrigin := configs.ApplicationConfig.Server.AllowOrigin
+		c.Header("Access-Control-Allow-Origin", allowOrigin)
 		c.Header("Access-Control-Allow-Headers", "*")
 		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, HEAD, PATCH")
 

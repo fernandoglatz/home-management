@@ -16,6 +16,8 @@ var database *mongo.Database
 var collections map[string]*mongo.Collection = make(map[string]*mongo.Collection)
 
 func ConnectToMongoDB() error {
+	log.Println("Connecting to MongoDB")
+
 	config := configs.ApplicationConfig
 	uri := config.Database.URI
 	databaseName := config.Database.Name

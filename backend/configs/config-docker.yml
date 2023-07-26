@@ -1,6 +1,11 @@
+server:
+  listening: "0.0.0.0:8080"
+  allow-origin: "http://localhost:3000"
+
 database:
   uri: "mongodb://mongo:27017"
   name: "home-management"
 
-server:
-  listening: "0.0.0.0:8080"
+mosquitto:
+  uri: "tcp://mosquitto:1883"
+  topic: "esp32/to-server"

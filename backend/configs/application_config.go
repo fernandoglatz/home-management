@@ -14,8 +14,13 @@ type Config struct {
 		Name string `yaml:"name"`
 	} `yaml:"database"`
 	Server struct {
-		Listening string `yaml:"listening"`
+		Listening   string `yaml:"listening"`
+		AllowOrigin string `yaml:"allow-origin"`
 	} `yaml:"server"`
+	Mosquitto struct {
+		URI   string `yaml:"uri"`
+		Topic string `yaml:"topic"`
+	} `yaml:"mosquitto"`
 }
 
 var ApplicationConfig Config

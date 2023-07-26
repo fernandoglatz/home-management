@@ -24,5 +24,19 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    hostname: mosquitto
+    ports:
+      - "0.0.0.0:1883:1883"
+      - "0.0.0.0:9001:9001"
+    volumes:
+      - ./docker-compose/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+
 volumes:
   mongodb_data:
+  mosquitto-data:
+  mosquitto-log:
