@@ -7,5 +7,6 @@ database:
   name: "home-management"
 
 mosquitto:
+  clientID: "backend"
   uri: "tcp://localhost:1883"
-  topic: "esp32/to-server"
+  topic: "home-management/events"

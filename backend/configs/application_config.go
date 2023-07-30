@@ -18,6 +18,7 @@ type Config struct {
 		AllowOrigin string `yaml:"allow-origin"`
 	} `yaml:"server"`
 	Mosquitto struct {
+		ClientID   string `yaml:"clientID"`
 		URI   string `yaml:"uri"`
 		Topic string `yaml:"topic"`
 	} `yaml:"mosquitto"`
