@@ -1,42 +1,53 @@
 version: "3"
 services:
   backend:
-    build:
-      context: backend
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mongo
-
-  frontend:
-    build:
-      context: frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
+    build: ./backend
+    hostname: home-management-backend
+    network_mode: "host"
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
 
   mongo:
-    image: mongo
+    image: mongo:7
+    hostname: home-management-mongo
     ports:
       - "27017:27017"
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
     volumes:
-      - mongodb_data:/data/db
+      - mongodb-data:/data/db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
 
-  mosquitto:
-    image: eclipse-mosquitto:2
-    hostname: mosquitto
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    hostname: rabbitmq
     ports:
       - "0.0.0.0:1883:1883"
-      - "0.0.0.0:9001:9001"
+      - "0.0.0.0:5672:5672"
+      - "0.0.0.0:15672:15672"
+    command: '/bin/bash -c "rabbitmq-plugins enable --offline rabbitmq_mqtt; rabbitmq-server"'
+    environment:
+      - TZ=${TZ}
     volumes:
-      - ./docker-compose/mosquitto.conf:/mosquitto/config/mosquitto.conf
-      - mosquitto-data:/mosquitto/data
-      - mosquitto-log:/mosquitto/log
+      - rabbitmq-data:/var/lib/rabbitmq
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
 
 volumes:
-  mongodb_data:
+  mongodb-data:
   mosquitto-data:
   mosquitto-log:
+  rabbitmq-data:

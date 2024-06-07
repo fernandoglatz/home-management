@@ -1,0 +1,65 @@
+{
+  "users": [
+    {
+      "name": "guest",
+      "password_hash": "J1fHmTUzHsw1haogO4FntwspdWfSLZNFz4VUb4AhoWeRlLBS",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": ["administrator"],
+      "limits": {}
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "guest",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "queues": [
+    {
+      "name": "home-management-events-queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "home-management-events-exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "home-management-events-exchange",
+      "vhost": "/",
+      "destination": "home-management-events-queue",
+      "destination_type": "queue",
+      "routing_key": "home-management-events-queue",
+      "arguments": {}
+    },
+    {
+      "source": "amq.topic",
+      "vhost": "/",
+      "destination": "home-management-events-queue",
+      "destination_type": "queue",
+      "routing_key": "home-management.events",
+      "arguments": {}
+    }
+  ]
+}

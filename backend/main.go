@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"github.com/fernandoglatz/home-management/backend/api"
-	"github.com/fernandoglatz/home-management/backend/brokers"
 	"github.com/fernandoglatz/home-management/backend/configs"
 	"github.com/fernandoglatz/home-management/backend/utils"
 )
@@ -38,17 +37,6 @@ func main() {
 
 	// Connect to MongoDB
 	err = utils.ConnectToMongoDB()
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	// Connect to MQTT
-	err = utils.ConnectToMQTT()
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	err = brokers.Setup()
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
