@@ -25,6 +25,7 @@ go.work
 #Node
 node_modules
 
+esp32/*/.gitignore
 esp32/*/.pio
 esp32/*/.vscode
 esp32/*/*/README

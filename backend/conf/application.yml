@@ -1,0 +1,13 @@
+server:
+  listening: "0.0.0.0:8080"
+  context-path: "/api"
+
+data:
+  mongo:
+    uri: "mongodb://host.docker.internal:27017"
+    database: "home-management"
+
+log:
+  level: INFO
+  format: TEXT
+  colored: true

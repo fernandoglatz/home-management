@@ -1,13 +1,21 @@
-FROM golang:1.20-alpine
+FROM golang:1.21-alpine as go-alpine
+RUN apk --no-cache add tzdata
+COPY . /go/src
+WORKDIR /go/src
+RUN go build -a -tags netgo -ldflags '-w -extldflags "-static"' -o main .
 
-WORKDIR /src
 
-COPY . .
-RUN rm -rf configs/*.yml && go mod download && go build -o main . && mkdir -p /app && mv main /app && rm -rf /src
+FROM busybox
 WORKDIR /app
-COPY configs/config-docker.yml configs/config.yml
-COPY scripts scripts
+
+COPY --from=go-alpine /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=go-alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=go-alpine /go/src/main /app
+COPY conf /app/conf
+COPY scripts /app/scripts
 
 EXPOSE 8080
 
-CMD ["./main"]
+ENV TZ=America/Sao_Paulo
+
+CMD ["/app/main"]

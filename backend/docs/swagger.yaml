@@ -1,155 +1,38 @@
 basePath: /api
 definitions:
-  dtos.DeviceDTO:
+  entity.Event:
     properties:
-      description:
-        type: string
-      home:
-        type: string
-      name:
-        type: string
-    required:
-    - home
-    - name
-    type: object
-  dtos.EventDTO:
-    properties:
-      booleanValue:
-        type: boolean
-      details:
+      createdAt:
         type: string
       device:
         type: string
       home:
         type: string
-      name:
-        type: string
-      numericValue:
-        type: number
-      textValue:
+      id:
         type: string
       type:
         type: string
-    required:
-    - device
-    - home
-    - name
-    - type
-    type: object
-  dtos.HomeDTO:
-    properties:
-      name:
+      updatedAt:
         type: string
-      users:
-        items:
-          type: string
-        type: array
-    required:
-    - name
+      version:
+        type: string
     type: object
-  dtos.ResponseDTO:
+  response.Response:
     properties:
-      details:
+      code:
         type: string
       message:
         type: string
     type: object
-  dtos.UserDTO:
-    properties:
-      email:
-        type: string
-      name:
-        type: string
-    required:
-    - email
-    - name
-    type: object
-  models.Device:
-    properties:
-      createdAt:
-        type: string
-      description:
-        type: string
-      home:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      updatedAt:
-        type: string
-    type: object
-  models.Event:
-    properties:
-      booleanValue:
-        type: boolean
-      createdAt:
-        type: string
-      details:
-        type: string
-      device:
-        type: string
-      home:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      numericValue:
-        type: number
-      textValue:
-        type: string
-      type:
-        type: string
-      updatedAt:
-        type: string
-    type: object
-  models.Home:
-    properties:
-      createdAt:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      updatedAt:
-        type: string
-      users:
-        items:
-          type: string
-        type: array
-    type: object
-  models.User:
-    properties:
-      createdAt:
-        type: string
-      email:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      updatedAt:
-        type: string
-    type: object
-externalDocs:
-  description: OpenAPI
-  url: https://swagger.io/resources/open-api/
-host: localhost:8080
 info:
-  contact:
-    email: support@swagger.io
-    name: API Support
-    url: http://www.swagger.io/support
-  description: This is a sample server celler server.
+  contact: {}
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: http://swagger.io/terms/
-  title: Swagger Example API
+  title: home-management
   version: "1.0"
 paths:
-  /v1/devices:
+  /event:
     get:
       produces:
       - application/json
@@ -158,152 +41,101 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Device'
+              $ref: '#/definitions/entity.Event'
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Find device
+            $ref: '#/definitions/response.Response'
+      summary: Get events
       tags:
-      - devices
-    options:
-      responses: {}
-      summary: Options
-      tags:
-      - devices
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.DeviceDTO'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Device'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Create device
-      tags:
-      - devices
-  /v1/devices/{id}:
-    delete:
-      parameters:
-      - description: Device ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Delete device
-      tags:
-      - devices
-    get:
-      parameters:
-      - description: Device ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Device'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Find device
-      tags:
-      - devices
-    head:
-      parameters:
-      - description: Device ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses: {}
-      summary: Check if device exists
-      tags:
-      - devices
-    patch:
-      consumes:
-      - application/json
-      parameters:
-      - description: Device ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.DeviceDTO'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Device'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Partial update device
-      tags:
-      - devices
+      - event
     put:
       consumes:
       - application/json
       parameters:
-      - description: Device ID
+      - description: body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Event'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Event'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Create event
+      tags:
+      - event
+  /event/{id}:
+    delete:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Delete event
+      tags:
+      - event
+    get:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Event'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get event
+      tags:
+      - event
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: id
         in: path
         name: id
         required: true
@@ -313,131 +145,112 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dtos.DeviceDTO'
+          $ref: '#/definitions/entity.Event'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Device'
+            $ref: '#/definitions/entity.Event'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Update device
+            $ref: '#/definitions/response.Response'
+      summary: Update event
       tags:
-      - devices
-  /v1/events:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Event'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Find event
-      tags:
-      - events
-    options:
-      responses: {}
-      summary: Options
-      tags:
-      - events
+      - event
     post:
       consumes:
       - application/json
       parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
       - description: body
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dtos.EventDTO'
+          $ref: '#/definitions/entity.Event'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Event'
+            $ref: '#/definitions/entity.Event'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Create event
+            $ref: '#/definitions/response.Response'
+      summary: Update event
       tags:
-      - events
-  /v1/events/{id}:
-    delete:
+      - event
+    put:
+      consumes:
+      - application/json
       parameters:
-      - description: Event ID
+      - description: id
         in: path
         name: id
         required: true
         type: string
+      - description: body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Event'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
+            $ref: '#/definitions/entity.Event'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Delete event
+            $ref: '#/definitions/response.Response'
+      summary: Update event
       tags:
-      - events
+      - event
+  /health:
     get:
-      parameters:
-      - description: Event ID
-        in: path
-        name: id
-        required: true
-        type: string
       produces:
-      - application/json
+      - text/plain
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Event'
+            type: string
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
+            type: string
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Find event
+            type: string
+      summary: Get health
       tags:
-      - events
+      - health
+  /v1/events/{id}:
     head:
       parameters:
       - description: Event ID
@@ -445,443 +258,22 @@ paths:
         name: id
         required: true
         type: string
-      responses: {}
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
       summary: Check if event exists
       tags:
       - events
-    patch:
-      consumes:
-      - application/json
-      parameters:
-      - description: Event ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.EventDTO'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Event'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Partial update event
-      tags:
-      - events
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: Event ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.EventDTO'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Event'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Update event
-      tags:
-      - events
-  /v1/homes:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Home'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Find home
-      tags:
-      - homes
-    options:
-      responses: {}
-      summary: Options
-      tags:
-      - homes
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.HomeDTO'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Home'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Create home
-      tags:
-      - homes
-  /v1/homes/{id}:
-    delete:
-      parameters:
-      - description: Home ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Delete home
-      tags:
-      - homes
-    get:
-      parameters:
-      - description: Home ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Home'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Find home
-      tags:
-      - homes
-    head:
-      parameters:
-      - description: Home ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses: {}
-      summary: Check if home exists
-      tags:
-      - homes
-    patch:
-      consumes:
-      - application/json
-      parameters:
-      - description: Home ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.HomeDTO'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Home'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Partial update home
-      tags:
-      - homes
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: Home ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.HomeDTO'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Home'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Update home
-      tags:
-      - homes
-  /v1/users:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.User'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Find user
-      tags:
-      - users
-    options:
-      responses: {}
-      summary: Options
-      tags:
-      - users
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.UserDTO'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.User'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Create user
-      tags:
-      - users
-  /v1/users/{id}:
-    delete:
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Delete user
-      tags:
-      - users
-    get:
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.User'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Find user
-      tags:
-      - users
-    head:
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses: {}
-      summary: Check if user exists
-      tags:
-      - users
-    patch:
-      consumes:
-      - application/json
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.UserDTO'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.User'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Partial update user
-      tags:
-      - users
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.UserDTO'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.User'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.ResponseDTO'
-      summary: Update user
-      tags:
-      - users
 securityDefinitions:
   BasicAuth:
     type: basic
+  Bearer:
+    description: Generated by /authentication
+    in: header
+    name: X-AUTHORIZATION
+    type: apiKey
 swagger: "2.0"

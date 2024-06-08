@@ -30,9 +30,9 @@ services:
     image: "rabbitmq:3-management"
     hostname: rabbitmq
     ports:
-      - "0.0.0.0:1883:1883"
-      - "0.0.0.0:5672:5672"
-      - "0.0.0.0:15672:15672"
+      - "1883:1883"
+      - "5672:5672"
+      - "15672:15672"
     command: '/bin/bash -c "rabbitmq-plugins enable --offline rabbitmq_mqtt; rabbitmq-server"'
     environment:
       - TZ=${TZ}
