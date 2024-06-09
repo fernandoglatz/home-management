@@ -26,10 +26,8 @@ broker:
 
   rabbitmq:
     uri: "amqp://guest:guest@localhost:5672/"
-    exchanges:
-      events: "home-management-events-exchange"
     queues:
-      events: "home-management-events-queue"
+      events: "home-management-events"
 
 log:
   level: INFO

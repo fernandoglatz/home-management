@@ -147,7 +147,7 @@ func (loggerEvent *LoggerEvent) Msg(msg string) {
 			}
 		}
 
-		if caller != "" {
+		if caller != constants.EMPTY {
 			event = event.Str("caller", caller)
 		}
 

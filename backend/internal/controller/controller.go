@@ -153,7 +153,7 @@ func (controller *Controller[T]) Patch(ginCtx *gin.Context) {
 		fieldType := entityType.Field(i)
 		fieldValue := entityValue.Field(i)
 		fieldJsonTag := fieldType.Tag.Get("json")
-		jsonTag := strings.Replace(fieldJsonTag, ",omitempty", "", -1)
+		jsonTag := strings.Replace(fieldJsonTag, ",omitempty", constants.EMPTY, -1)
 
 		value := jsonData[jsonTag]
 		if value != nil {

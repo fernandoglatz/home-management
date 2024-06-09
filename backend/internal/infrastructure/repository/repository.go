@@ -84,7 +84,7 @@ func (repository *Repository[T]) Save(ctx context.Context, entity *T) *exception
 	if len((*entity).GetID()) == constants.ZERO {
 		uuidObj, _ := uuid.NewRandom()
 		uuidStr := uuidObj.String()
-		(*entity).SetID(strings.Replace(uuidStr, "-", "", -1))
+		(*entity).SetID(strings.Replace(uuidStr, "-", constants.EMPTY, -1))
 	}
 
 	var err error

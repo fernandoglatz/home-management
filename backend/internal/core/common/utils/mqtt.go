@@ -48,20 +48,6 @@ func ConnectToMQTT(ctx context.Context) error {
 	return nil
 }
 
-func (mqttBroker *MqttBrokerType) Subscribe(ctx context.Context, topic string, callback mqtt.MessageHandler) error {
-	log.Info(ctx).Msg("Subscribing to topic [" + topic + "]")
-
-	client := mqttBroker.Client
-	token := client.Subscribe(topic, MQTT_QOS, callback)
-	if token.Wait() && token.Error() != nil {
-		return token.Error()
-	}
-
-	log.Info(ctx).Msg("Subscribed to topic [" + topic + "]!")
-
-	return nil
-}
-
 func (mqttBroker *MqttBrokerType) Publish(ctx context.Context, topic string, object any) error {
 	jsonData, err := json.Marshal(object)
 	if err != nil {
@@ -76,6 +62,20 @@ func (mqttBroker *MqttBrokerType) Publish(ctx context.Context, topic string, obj
 	}
 
 	log.Info(ctx).Msg("Published message [" + json + "] to topic [" + topic + "]")
+
+	return nil
+}
+
+func (mqttBroker *MqttBrokerType) Subscribe(ctx context.Context, topic string, callback mqtt.MessageHandler) error {
+	log.Info(ctx).Msg("Subscribing to topic [" + topic + "]")
+
+	client := mqttBroker.Client
+	token := client.Subscribe(topic, MQTT_QOS, callback)
+	if token.Wait() && token.Error() != nil {
+		return token.Error()
+	}
+
+	log.Info(ctx).Msg("Subscribed to topic [" + topic + "]!")
 
 	return nil
 }

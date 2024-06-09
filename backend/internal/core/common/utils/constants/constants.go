@@ -15,4 +15,6 @@ const (
 	ZERO = 0
 	ONE  = 1
 	TEN  = 10
+
+	EMPTY = ""
 )

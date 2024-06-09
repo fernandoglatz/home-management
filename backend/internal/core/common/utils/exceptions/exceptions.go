@@ -1,5 +1,7 @@
 package exceptions
 
+import "fernandoglatz/home-management/internal/core/common/utils/constants"
+
 var (
 	GenericError = BaseError{
 		Code:    "GENERIC_ERROR",
@@ -49,25 +51,25 @@ func (wrappedError WrappedError) GetMessage() string {
 		return wrappedError.Error.Error()
 	}
 
-	if wrappedError.Message != "" {
+	if wrappedError.Message != constants.EMPTY {
 		return wrappedError.Message
 	}
 
-	if wrappedError.BaseError.Message != "" {
+	if wrappedError.BaseError.Message != constants.EMPTY {
 		return wrappedError.BaseError.Message
 	}
 
-	return ""
+	return constants.EMPTY
 }
 
 func (wrappedError WrappedError) GetCode() string {
-	if wrappedError.Code != "" {
+	if wrappedError.Code != constants.EMPTY {
 		return wrappedError.Code
 	}
 
-	if wrappedError.BaseError.Code != "" {
+	if wrappedError.BaseError.Code != constants.EMPTY {
 		return wrappedError.BaseError.Code
 	}
 
-	return ""
+	return constants.EMPTY
 }

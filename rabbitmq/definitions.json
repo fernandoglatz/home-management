@@ -33,26 +33,7 @@
       }
     }
   ],
-  "exchanges": [
-    {
-      "name": "home-management-events-exchange",
-      "vhost": "/",
-      "type": "direct",
-      "durable": true,
-      "auto_delete": false,
-      "internal": false,
-      "arguments": {}
-    }
-  ],
   "bindings": [
-    {
-      "source": "home-management-events-exchange",
-      "vhost": "/",
-      "destination": "home-management-events-queue",
-      "destination_type": "queue",
-      "routing_key": "home-management-events-queue",
-      "arguments": {}
-    },
     {
       "source": "amq.topic",
       "vhost": "/",

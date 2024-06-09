@@ -4,6 +4,7 @@ import (
 	"context"
 	_ "fernandoglatz/home-management/docs"
 	"fernandoglatz/home-management/internal/controller"
+	"fernandoglatz/home-management/internal/core/common/utils/constants"
 	"fernandoglatz/home-management/internal/core/common/utils/log"
 	"fernandoglatz/home-management/internal/infrastructure/config"
 
@@ -22,10 +23,10 @@ func Setup(ctx context.Context, engine *gin.Engine) {
 
 	eventController := controller.NewEventController()
 	routerEvent := router.Group("/event")
-	routerEvent.GET("", eventController.Get)
+	routerEvent.GET(constants.EMPTY, eventController.Get)
 	routerEvent.GET(":id", eventController.GetById)
 	routerEvent.HEAD(":id", eventController.Head)
-	routerEvent.PUT("", eventController.Put)
+	routerEvent.PUT(constants.EMPTY, eventController.Put)
 	routerEvent.PUT(":id", eventController.PutById)
 	routerEvent.POST(":id", eventController.Post)
 	routerEvent.PATCH(":id", eventController.Patch)
