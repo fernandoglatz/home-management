@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fernandoglatz/home-management/internal/broker"
 	"fernandoglatz/home-management/internal/core/common/utils/log"
 
 	"fernandoglatz/home-management/internal/core/common/utils"
@@ -35,6 +36,26 @@ func main() {
 	}
 
 	err = utils.ConnectToMongoDB(ctx)
+	if err != nil {
+		log.Fatal(ctx).Msg(err.Error())
+	}
+
+	err = utils.ConnectToRedis(ctx)
+	if err != nil {
+		log.Fatal(ctx).Msg(err.Error())
+	}
+
+	err = utils.ConnectToMQTT(ctx)
+	if err != nil {
+		log.Fatal(ctx).Msg(err.Error())
+	}
+
+	err = utils.ConnectToRabbitMQ(ctx)
+	if err != nil {
+		log.Fatal(ctx).Msg(err.Error())
+	}
+
+	err = broker.Setup(ctx)
 	if err != nil {
 		log.Fatal(ctx).Msg(err.Error())
 	}

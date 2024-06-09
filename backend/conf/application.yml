@@ -7,6 +7,30 @@ data:
     uri: "mongodb://host.docker.internal:27017"
     database: "home-management"
 
+  redis:
+    address: "localhost:6379"
+    password: ""
+    db: 0
+    ttl:
+      rf-event: 1m
+
+broker:
+  mqtt:
+    uri: "tcp://localhost:1883"
+    client-id: "home-management-backend"
+    user: "guest"
+    password: "guest"
+    topics:
+      broadcast: "home-management/broadcast"
+      devices: "home-management/devices"
+
+  rabbitmq:
+    uri: "amqp://guest:guest@localhost:5672/"
+    exchanges:
+      events: "home-management-events-exchange"
+    queues:
+      events: "home-management-events-queue"
+
 log:
   level: INFO
   format: TEXT

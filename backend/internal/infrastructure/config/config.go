@@ -7,6 +7,7 @@ import (
 	"fernandoglatz/home-management/internal/core/common/utils/log"
 	"fernandoglatz/home-management/internal/infrastructure/config/format"
 	"os"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -22,20 +23,51 @@ type Config struct {
 			Uri      string `yaml:"uri"`
 			Database string `yaml:"database"`
 		} `yaml:"mongo"`
+
+		Redis struct {
+			Address  string `yaml:"address"`
+			Password string `yaml:"password"`
+			Db       int    `yaml:"db"`
+
+			TTL struct {
+				RfEvent time.Duration `yaml:"rf-event"`
+			} `yaml:"ttl"`
+		} `yaml:"redis"`
 	} `yaml:"data"`
+
+	Broker struct {
+		Mqtt struct {
+			Uri      string `yaml:"uri"`
+			ClientId string `yaml:"client-id"`
+			User     string `yaml:"user"`
+			Password string `yaml:"password"`
+
+			Topics struct {
+				Broadcast string `yaml:"broadcast"`
+				Devices   string `yaml:"devices"`
+			} `yaml:"topics"`
+		} `yaml:"mqtt"`
+
+		RabbitMQ struct {
+			Uri      string `yaml:"uri"`
+			User     string `yaml:"user"`
+			Password string `yaml:"password"`
+
+			Exchanges struct {
+				Events string `yaml:"events"`
+			} `yaml:"exchanges"`
+
+			Queues struct {
+				Events string `yaml:"events"`
+			} `yaml:"queues"`
+		} `yaml:"rabbitmq"`
+	} `yaml:"broker"`
 
 	Log struct {
 		Level   string        `yaml:"level"`
 		Format  format.Format `yaml:"format"`
 		Colored bool          `yaml:"colored"`
 	} `yaml:"log"`
-}
-
-type Tenant struct {
-	Channel           string `yaml:"channel"`
-	Credential        string `yaml:"credential"`
-	PreferenceId      string `yaml:"preference-id"`
-	CollectionPointId string `yaml:"collection-point-id"`
 }
 
 var ApplicationConfig Config

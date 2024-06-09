@@ -128,7 +128,7 @@ func (controller *Controller[T]) Patch(ginCtx *gin.Context) {
 	ctx := GetContext(ginCtx)
 	id := ginCtx.Param("id")
 
-	var jsonData map[string]interface{}
+	var jsonData map[string]any
 	err := ginCtx.ShouldBindJSON(&jsonData)
 	if err != nil {
 		errw := &exceptions.WrappedError{

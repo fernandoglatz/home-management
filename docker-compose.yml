@@ -2,7 +2,8 @@ services:
   backend:
     build: ./backend
     hostname: home-management-backend
-    network_mode: "host"
+    ports:
+      - "8080:8080"
     restart: unless-stopped
     environment:
       - TZ=${TZ}
@@ -21,6 +22,21 @@ services:
       - TZ=${TZ}
     volumes:
       - mongodb-data:/data/db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+
+  redis:
+    image: redis:7
+    hostname: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
     logging:
       driver: "json-file"
       options:
@@ -50,3 +66,4 @@ volumes:
   mosquitto-data:
   mosquitto-log:
   rabbitmq-data:
+  redis-data:

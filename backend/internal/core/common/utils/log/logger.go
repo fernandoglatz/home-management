@@ -135,8 +135,6 @@ func (loggerEvent *LoggerEvent) Msg(msg string) {
 
 		if format.JSON == currentFormat {
 			event.Time("@timestamp", now)
-			event.Str("logName", "home-management")
-			event.Str("logIndex", "clarofree")
 		}
 
 		if traceMap != nil {

@@ -31,7 +31,7 @@ func (repository *Repository[T]) Get(ctx context.Context, id string) (T, *except
 	return repository.getByFilter(ctx, filter)
 }
 
-func (repository *Repository[T]) getByFilter(ctx context.Context, filter interface{}) (T, *exceptions.WrappedError) {
+func (repository *Repository[T]) getByFilter(ctx context.Context, filter any) (T, *exceptions.WrappedError) {
 	var entity T
 
 	err := repository.collection.FindOne(ctx, filter).Decode(&entity)

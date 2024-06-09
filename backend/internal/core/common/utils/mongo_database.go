@@ -12,9 +12,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var MongoDatabase mongoDatabaseType
+var MongoDatabase MongoDatabaseType
 
-type mongoDatabaseType struct {
+type MongoDatabaseType struct {
 	Client      *mongo.Database
 	collections map[string]*mongo.Collection
 }
@@ -56,7 +56,7 @@ func ConnectToMongoDB(ctx context.Context) error {
 		return err
 	}
 
-	MongoDatabase = mongoDatabaseType{
+	MongoDatabase = MongoDatabaseType{
 		Client:      client.Database(databaseName),
 		collections: make(map[string]*mongo.Collection),
 	}
@@ -64,7 +64,7 @@ func ConnectToMongoDB(ctx context.Context) error {
 	return nil
 }
 
-func (mongoDatabase mongoDatabaseType) GetCollection(collectionName string) *mongo.Collection {
+func (mongoDatabase MongoDatabaseType) GetCollection(collectionName string) *mongo.Collection {
 	collection := mongoDatabase.collections[collectionName]
 
 	if collection == nil {
