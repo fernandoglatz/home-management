@@ -12,6 +12,7 @@ const int RF_READ_PIN = 13;
 const int RF_WRITE_PIN = 14;
 const int RF_CS_PIN = 12;
 const int BLINK_INTERVAL = 500;
+const int DEFAULT_FREQUENCY = 433;
 
 const unsigned long BAUD_RATE = 115200;
 const unsigned long EEPROM_SIZE = 512;
@@ -25,12 +26,13 @@ const String ACTION_RESET = "RESET";
 const String ACTION_SET_CONFIG = "SET_CONFIG";
 const String ACTION_GET_CONFIG = "GET_CONFIG";
 const String ACTION_GET_INFO = "GET_INFO";
-const String ACTION_SEND_RF_433 = "SEND_RF_433";
+const String ACTION_SEND_RF = "SEND_RF";
 const String ACTION_STATUS = "status";
 const String STATUS_OK = "OK";
 const String STATUS_ERROR = "ERROR";
 
 const String CONFIG = "config";
+const String FREQUENCY = "frequency";
 const String TYPE = "type";
 const String DEVICE = "device";
 const String DATE = "date";
@@ -49,8 +51,8 @@ const String SDK_VERSION = "sdkVersion";
 
 const String DEVICE_NAME = "esp32";
 const String VERSION_VALUE = "1.0.0";
-const String TYPE_RECEIVED_RF_433 = "RECEIVED_RF_433";
-const String TYPE_SEND_RF_433 = "SEND_RF_433";
+const String TYPE_RECEIVED_RF = "RECEIVED_RF";
+const String TYPE_SEND_RF = "SEND_RF";
 const String TYPE_MQTT_CONNECTED = "MQTT_CONNECTED";
 const String TYPE_RESTART = "RESTART";
 const String TYPE_RESET = "RESET";
@@ -59,20 +61,23 @@ const String TYPE_GET_CONFIG = "GET_CONFIG";
 const String TYPE_GET_INFO = "GET_INFO";
 const String TYPE_ACTION_UNRECOGNIZED = "ACTION_UNRECOGNIZED";
 
-const char* WIFI_NAME = "<REPLACE>";
-const char* WIFI_PASSWORD = "<REPLACE>";
+const char* WIFI_NAME = "<REPLACE_ME>";
+const char* WIFI_PASSWORD = "<REPLACE_ME>";
 
-const char* MQTT_HOST = "<REPLACE>";
+const char* MQTT_HOST = "<REPLACE_ME>";
 const uint16_t MQTT_PORT = 1883;
 const char* MQTT_USER = "esp32";
-const char* MQTT_PASSWORD = "<REPLACE>";
+const char* MQTT_PASSWORD = "<REPLACE_ME>";
 
+const char* TOPIC_BROADCAST = "home-management/broadcast";
 const char* TOPIC_EVENTS = "home-management/events";
-const char* TOPIC_DEVICES = "home-management/devices/";
+const char* TOPIC_DEVICES = "home-management/devices";
+const char* TOPIC_DEVICES_SLASH = "home-management/devices/";
 
 const char* NTP_SERVER = "br.pool.ntp.org";
-const long GMT_OFFSET = 0;
+const long GMT_OFFSET = -10800;  // GMT -3
 const int DAYLIGHT_OFFSET = 0;
+const int MQTT_QOS = 1;
 
 unsigned long previousBlink = 0;
 
@@ -124,7 +129,7 @@ String getCurrentFormattedDate() {
 
     if (getLocalTime(&timeinfo)) {
         char buffer[DATE_BUFFER_SIZE];
-        strftime(buffer, sizeof(buffer), "%FT%TZ", &timeinfo);
+        strftime(buffer, sizeof(buffer), "%FT%T-03:00", &timeinfo);
         return String(buffer);
     }
 
@@ -158,7 +163,7 @@ bool checkWifiConnected() {
 }
 
 String getDeviceTopic() {
-    return TOPIC_DEVICES + DEVICE_NAME;
+    return TOPIC_DEVICES_SLASH + DEVICE_NAME;
 }
 
 void sendMqttConnectedMessage() {
@@ -189,11 +194,13 @@ bool mqttConnect() {
         mqttClient.setServer(MQTT_HOST, MQTT_PORT);
         mqttClient.setBufferSize(MQTT_BUFFER_SIZE);
 
-        if (mqttClient.connect(DEVICE_NAME.c_str(), MQTT_USER, MQTT_PASSWORD, 0, 0, 0, 0, 0)) {
+        if (mqttClient.connect(DEVICE_NAME.c_str(), MQTT_USER, MQTT_PASSWORD, 0, MQTT_QOS, false, 0, false)) {
             logInfo("MQTT connected");
 
             String topic = getDeviceTopic();
-            mqttClient.subscribe(topic.c_str(), 1);
+            mqttClient.subscribe(topic.c_str(), MQTT_QOS);
+            mqttClient.subscribe(TOPIC_BROADCAST, MQTT_QOS);
+            mqttClient.subscribe(TOPIC_DEVICES, MQTT_QOS);
             connected = true;
 
             sendMqttConnectedMessage();
@@ -333,7 +340,7 @@ void handleActionRestartDevice() {
     sendMqttMessage(TOPIC_EVENTS, eventJson);
 }
 
-void handleActionSendRF433(JsonDocument receivedJson) {
+void handleActionSendRF(JsonDocument receivedJson) {
     int protocol = receivedJson[PROTOCOL];
     unsigned long code = receivedJson[CODE];
     unsigned int length = receivedJson[BITS];
@@ -342,7 +349,7 @@ void handleActionSendRF433(JsonDocument receivedJson) {
     mySwitch.send(code, length);
 
     JsonDocument eventJson;
-    eventJson[TYPE] = TYPE_SEND_RF_433;
+    eventJson[TYPE] = TYPE_SEND_RF;
     eventJson[ACTION_STATUS] = STATUS_OK;
 
     sendMqttMessage(TOPIC_EVENTS, eventJson);
@@ -385,8 +392,8 @@ void mqttCallback(char* topic, byte* message, unsigned int length) {
             } else if (ACTION_RESET.equals(action)) {
                 handleActionResetDevice();
 
-            } else if (ACTION_SEND_RF_433.equals(action)) {
-                handleActionSendRF433(receivedJson);
+            } else if (ACTION_SEND_RF.equals(action)) {
+                handleActionSendRF(receivedJson);
 
             } else if (action != "null") {
                 handleActionUnrecognized(action);
@@ -452,11 +459,12 @@ void loop() {
         mySwitch.resetAvailable();
 
         JsonDocument eventJson;
-        eventJson[TYPE] = TYPE_RECEIVED_RF_433;
+        eventJson[TYPE] = TYPE_RECEIVED_RF;
         eventJson[CODE] = code;
         eventJson[BITS] = bits;
         eventJson[PROTOCOL] = protocol;
         eventJson[RECEIVE_TOLERANCE] = receiveTolerance;
+        eventJson[FREQUENCY] = DEFAULT_FREQUENCY;
         sendMqttMessage(TOPIC_EVENTS, eventJson);
 
         digitalWrite(LED_BUILTIN, LOW);
