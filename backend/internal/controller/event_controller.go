@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fernandoglatz/home-management/internal/core/entity"
+	"fernandoglatz/home-management/internal/core/model/request"
 	"fernandoglatz/home-management/internal/core/service"
 	"sync"
 
@@ -11,23 +12,23 @@ import (
 var eventController any
 var eventControllerMutex sync.Mutex
 
-type EventController[T entity.IEntity] struct {
-	controller Controller[T]
+type EventController[T entity.IEvent, RQ request.EventRequest] struct {
+	controller Controller[T, RQ]
 }
 
-func GetEventController[T entity.IEntity]() EventController[T] {
+func GetEventController[T entity.IEvent, RQ request.EventRequest]() EventController[T, RQ] {
 	eventControllerMutex.Lock()
 	defer eventControllerMutex.Unlock()
 
 	if eventController == nil {
 		eventService := service.GetEventService[T]()
 
-		eventController = EventController[T]{
-			controller: GetController[T](&eventService),
+		eventController = EventController[T, RQ]{
+			controller: GetController[T, RQ](&eventService),
 		}
 	}
 
-	return eventController.(EventController[T])
+	return eventController.(EventController[T, RQ])
 }
 
 // @Tags	event
@@ -37,7 +38,7 @@ func GetEventController[T entity.IEntity]() EventController[T] {
 // @Failure	400	{object}	response.Response
 // @Failure	500	{object}	response.Response
 // @Router	/event [get]
-func (eventController *EventController[T]) Get(ginCtx *gin.Context) {
+func (eventController EventController[T, RQ]) Get(ginCtx *gin.Context) {
 	eventController.controller.Get(ginCtx)
 }
 
@@ -49,62 +50,62 @@ func (eventController *EventController[T]) Get(ginCtx *gin.Context) {
 // @Failure	400	{object}	response.Response
 // @Failure	500	{object}	response.Response
 // @Router	/event/{id} [get]
-func (eventController *EventController[T]) GetById(ginCtx *gin.Context) {
+func (eventController EventController[T, RQ]) GetById(ginCtx *gin.Context) {
 	eventController.controller.GetById(ginCtx)
 }
 
 // @Tags	event
 // @Summary	Update event
 // @Param	id		path	string  true "id"
-// @Param	request	body	entity.Event true "body"
+// @Param	request	body	request.EventRequest true "body"
 // @Accept	json
 // @Produce	json
 // @Success	200	{object}	entity.Event
 // @Failure	400	{object}	response.Response
 // @Failure	500	{object}	response.Response
 // @Router		/event/{id} [post]
-func (eventController *EventController[T]) Post(ginCtx *gin.Context) {
+func (eventController EventController[T, RQ]) Post(ginCtx *gin.Context) {
 	eventController.controller.Post(ginCtx)
 }
 
 // @Tags	event
 // @Summary	Create event
-// @Param	request	body	entity.Event true "body"
+// @Param	request	body	request.EventRequest true "body"
 // @Accept	json
 // @Produce	json
 // @Success	200	{object}	entity.Event
 // @Failure	400	{object}	response.Response
 // @Failure	500	{object}	response.Response
 // @Router		/event [put]
-func (eventController *EventController[T]) Put(ginCtx *gin.Context) {
+func (eventController EventController[T, RQ]) Put(ginCtx *gin.Context) {
 	eventController.controller.Put(ginCtx)
 }
 
 // @Tags	event
 // @Summary	Update event
 // @Param	id		path	string  true "id"
-// @Param	request	body	entity.Event true "body"
+// @Param	request	body	request.EventRequest true "body"
 // @Accept	json
 // @Produce	json
 // @Success	200	{object}	entity.Event
 // @Failure	400	{object}	response.Response
 // @Failure	500	{object}	response.Response
 // @Router		/event/{id} [put]
-func (eventController *EventController[T]) PutById(ginCtx *gin.Context) {
+func (eventController EventController[T, RQ]) PutById(ginCtx *gin.Context) {
 	eventController.controller.PutById(ginCtx)
 }
 
 // @Tags	event
 // @Summary	Update event
 // @Param	id		path	string  true "id"
-// @Param	request	body	entity.Event true "body"
+// @Param	request	body	request.EventRequest true "body"
 // @Accept	json
 // @Produce	json
 // @Success	200	{object}	entity.Event
 // @Failure	400	{object}	response.Response
 // @Failure	500	{object}	response.Response
 // @Router		/event/{id} [patch]
-func (eventController *EventController[T]) Patch(ginCtx *gin.Context) {
+func (eventController EventController[T, RQ]) Patch(ginCtx *gin.Context) {
 	eventController.controller.Patch(ginCtx)
 }
 
@@ -116,7 +117,7 @@ func (eventController *EventController[T]) Patch(ginCtx *gin.Context) {
 // @Failure	400	{object}	response.Response
 // @Failure	500	{object}	response.Response
 // @Router	/event/{id} [delete]
-func (eventController *EventController[T]) DeleteById(ginCtx *gin.Context) {
+func (eventController EventController[T, RQ]) DeleteById(ginCtx *gin.Context) {
 	eventController.controller.DeleteById(ginCtx)
 }
 
@@ -127,6 +128,6 @@ func (eventController *EventController[T]) DeleteById(ginCtx *gin.Context) {
 // @Failure	404
 // @Failure	500
 // @Router		/v1/events/{id} [head]
-func (eventController *EventController[T]) Head(ginCtx *gin.Context) {
+func (eventController EventController[T, RQ]) Head(ginCtx *gin.Context) {
 	eventController.controller.Head(ginCtx)
 }

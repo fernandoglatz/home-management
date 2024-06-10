@@ -43,18 +43,18 @@ func GetGenericService[T entity.IEntity]() Service[T] {
 	return service.(Service[T])
 }
 
-func (service *Service[T]) Get(ctx context.Context, id string) (T, *exceptions.WrappedError) {
+func (service Service[T]) Get(ctx context.Context, id string) (T, *exceptions.WrappedError) {
 	return service.repository.Get(ctx, id)
 }
 
-func (service *Service[T]) GetAll(ctx context.Context) ([]T, *exceptions.WrappedError) {
+func (service Service[T]) GetAll(ctx context.Context) ([]T, *exceptions.WrappedError) {
 	return service.repository.GetAll(ctx)
 }
 
-func (service *Service[T]) Save(ctx context.Context, entity *T) *exceptions.WrappedError {
+func (service Service[T]) Save(ctx context.Context, entity T) *exceptions.WrappedError {
 	return service.repository.Save(ctx, entity)
 }
 
-func (service *Service[T]) Remove(ctx context.Context, entity T) *exceptions.WrappedError {
+func (service Service[T]) Remove(ctx context.Context, entity T) *exceptions.WrappedError {
 	return service.repository.Remove(ctx, entity)
 }

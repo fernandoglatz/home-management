@@ -1,8 +1,5 @@
 [
   {
-    "create": "users"
-  },
-  {
     "create": "homes"
   },
   {

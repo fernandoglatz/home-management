@@ -1,9 +1,16 @@
 package utils
 
 import (
+	"encoding/json"
 	"errors"
 	"reflect"
 )
+
+func Instance[T any]() T {
+	var object T
+	json.Unmarshal([]byte("{}"), &object)
+	return object
+}
 
 func GetTypeName(object any) string {
 	return reflect.TypeOf(object).String()

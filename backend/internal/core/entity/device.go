@@ -7,6 +7,6 @@ type Device struct {
 	Description string `json:"description,omitempty" bson:"description,omitempty"`
 }
 
-func (device *Device) GetCollectionName() string {
+func (device Device) GetCollectionName() string {
 	return "devices"
 }

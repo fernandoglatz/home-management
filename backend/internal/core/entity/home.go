@@ -6,6 +6,6 @@ type Home struct {
 	Name   string   `json:"name,omitempty" bson:"name,omitempty"`
 }
 
-func (home *Home) GetCollectionName() string {
+func (home Home) GetCollectionName() string {
 	return "homes"
 }

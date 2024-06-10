@@ -1,8 +1,5 @@
 [
   {
-    "drop": "users"
-  },
-  {
     "drop": "homes"
   },
   {

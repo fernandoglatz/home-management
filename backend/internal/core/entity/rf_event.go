@@ -9,6 +9,6 @@ type RfEvent struct {
 	ReceiveTolerance int `json:"receiveTolerance" bson:"receiveTolerance"`
 }
 
-func (event *RfEvent) GetCollectionName() string {
+func (event RfEvent) GetCollectionName() string {
 	return "events"
 }

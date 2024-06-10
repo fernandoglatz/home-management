@@ -24,4 +24,5 @@ const (
 	ASTERISK = "*"
 	HASH     = "#"
 	COLON    = ":"
+	HYPHEN   = "-"
 )

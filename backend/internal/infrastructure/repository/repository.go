@@ -20,11 +20,11 @@ var repositories map[string]any
 var repositoryMutex sync.Mutex
 
 type Repository[T entity.IEntity] struct {
-	collection *mongo.Collection
+	collection mongo.Collection
 }
 
 func GetGenericRepository[T entity.IEntity]() Repository[T] {
-	var entity T
+	entity := utils.Instance[T]()
 	typeName := utils.GetTypeName(entity)
 
 	repositoryMutex.Lock()
@@ -48,13 +48,13 @@ func GetGenericRepository[T entity.IEntity]() Repository[T] {
 	return repository.(Repository[T])
 }
 
-func (repository *Repository[T]) Get(ctx context.Context, id string) (T, *exceptions.WrappedError) {
+func (repository Repository[T]) Get(ctx context.Context, id string) (T, *exceptions.WrappedError) {
 	filter := bson.M{"id": id}
 	return repository.getByFilter(ctx, filter)
 }
 
-func (repository *Repository[T]) getByFilter(ctx context.Context, filter any) (T, *exceptions.WrappedError) {
-	var entity T
+func (repository Repository[T]) getByFilter(ctx context.Context, filter any) (T, *exceptions.WrappedError) {
+	entity := utils.Instance[T]()
 
 	err := repository.collection.FindOne(ctx, filter).Decode(&entity)
 	if err == mongo.ErrNoDocuments {
@@ -67,14 +67,14 @@ func (repository *Repository[T]) getByFilter(ctx context.Context, filter any) (T
 		}
 	}
 
-	repository.CorrecTimezone(&entity)
+	repository.CorrecTimezone(entity)
 	return entity, nil
 }
 
-func (repository *Repository[T]) GetAll(ctx context.Context) ([]T, *exceptions.WrappedError) {
+func (repository Repository[T]) GetAll(ctx context.Context) ([]T, *exceptions.WrappedError) {
 	var entities []T = []T{}
 
-	cursor, err := repository.collection.Find(ctx, bson.D{})
+	cursor, err := repository.collection.Find(ctx, bson.M{})
 	if err != nil {
 		return entities, &exceptions.WrappedError{
 			Error: err,
@@ -84,7 +84,7 @@ func (repository *Repository[T]) GetAll(ctx context.Context) ([]T, *exceptions.W
 	defer cursor.Close(ctx)
 
 	for cursor.Next(ctx) {
-		var entity T
+		entity := utils.Instance[T]()
 		err = cursor.Decode(&entity)
 		if err != nil {
 			return entities, &exceptions.WrappedError{
@@ -92,30 +92,30 @@ func (repository *Repository[T]) GetAll(ctx context.Context) ([]T, *exceptions.W
 			}
 		}
 
-		repository.CorrecTimezone(&entity)
+		repository.CorrecTimezone(entity)
 		entities = append(entities, entity)
 	}
 
 	return entities, nil
 }
 
-func (repository *Repository[T]) Save(ctx context.Context, entity *T) *exceptions.WrappedError {
+func (repository Repository[T]) Save(ctx context.Context, entity T) *exceptions.WrappedError {
 	now := time.Now()
-	(*entity).SetUpdatedAt(now)
+	entity.SetUpdatedAt(now)
 
-	if len((*entity).GetID()) == constants.ZERO {
+	if len(entity.GetID()) == constants.ZERO {
 		uuidObj, _ := uuid.NewRandom()
 		uuidStr := uuidObj.String()
-		(*entity).SetID(strings.Replace(uuidStr, "-", constants.EMPTY, -1))
+		entity.SetID(strings.Replace(uuidStr, "-", constants.EMPTY, -1))
 	}
 
 	var err error
 
-	if (*entity).GetCreatedAt().IsZero() {
-		(*entity).SetCreatedAt(now)
+	if entity.GetCreatedAt().IsZero() {
+		entity.SetCreatedAt(now)
 		_, err = repository.collection.InsertOne(ctx, entity)
 	} else {
-		filter := bson.M{"id": (*entity).GetID()}
+		filter := bson.M{"id": entity.GetID()}
 		_, err = repository.collection.ReplaceOne(ctx, filter, entity)
 	}
 
@@ -135,7 +135,7 @@ func (repository *Repository[T]) Save(ctx context.Context, entity *T) *exception
 	return nil
 }
 
-func (repository *Repository[T]) Remove(ctx context.Context, entity T) *exceptions.WrappedError {
+func (repository Repository[T]) Remove(ctx context.Context, entity T) *exceptions.WrappedError {
 	filter := bson.M{"id": entity.GetID()}
 	_, err := repository.collection.DeleteOne(ctx, filter)
 	if err != nil {
@@ -147,12 +147,12 @@ func (repository *Repository[T]) Remove(ctx context.Context, entity T) *exceptio
 	return nil
 }
 
-func (repository *Repository[T]) CorrecTimezone(entity *T) {
+func (repository Repository[T]) CorrecTimezone(entity T) {
 	location, _ := time.LoadLocation(utils.GetTimezone())
 
-	createdAt := (*entity).GetCreatedAt()
-	updatedAt := (*entity).GetUpdatedAt()
+	createdAt := entity.GetCreatedAt()
+	updatedAt := entity.GetUpdatedAt()
 
-	(*entity).SetCreatedAt(createdAt.In(location))
-	(*entity).SetUpdatedAt(updatedAt.In(location))
+	entity.SetCreatedAt(createdAt.In(location))
+	entity.SetUpdatedAt(updatedAt.In(location))
 }

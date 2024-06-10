@@ -1,9 +1,5 @@
 [
   {
-    "dropIndexes": "users",
-    "indexes": ["id", "email"]
-  },
-  {
     "dropIndexes": "homes",
     "indexes": ["id"]
   },

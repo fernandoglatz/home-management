@@ -144,24 +144,24 @@ func IsLevelEnabled(level Level) bool {
 	return level >= currentLevel
 }
 
-func (loggerEvent *LoggerEvent) PutTraceMap(key string, value any) *LoggerEvent {
+func (loggerEvent LoggerEvent) PutTraceMap(key string, value any) LoggerEvent {
 	loggerEvent.traceMap[key] = value
 	return loggerEvent
 }
 
-func (loggerEvent *LoggerEvent) Caller(caller string) *LoggerEvent {
+func (loggerEvent LoggerEvent) Caller(caller string) LoggerEvent {
 	loggerEvent.caller = caller
 	return loggerEvent
 }
 
-func (loggerEvent *LoggerEvent) Wrap(err exceptions.WrappedError) {
+func (loggerEvent LoggerEvent) Wrap(err exceptions.WrappedError) {
 	if IsLevelEnabled(loggerEvent.level) {
 		message := err.GetMessage()
 		loggerEvent.Msg(message)
 	}
 }
 
-func (loggerEvent *LoggerEvent) Msg(msg string) {
+func (loggerEvent LoggerEvent) Msg(msg string) {
 	if IsLevelEnabled(loggerEvent.level) {
 		now := time.Now()
 		traceMap := loggerEvent.traceMap
@@ -190,32 +190,32 @@ func (loggerEvent *LoggerEvent) Msg(msg string) {
 	}
 }
 
-func Trace(ctx context.Context) *LoggerEvent {
+func Trace(ctx context.Context) LoggerEvent {
 	return CreateLoggerEvent(ctx, zlog.Trace(), TRACE)
 }
 
-func Debug(ctx context.Context) *LoggerEvent {
+func Debug(ctx context.Context) LoggerEvent {
 	return CreateLoggerEvent(ctx, zlog.Debug(), DEBUG)
 }
 
-func Info(ctx context.Context) *LoggerEvent {
+func Info(ctx context.Context) LoggerEvent {
 	return CreateLoggerEvent(ctx, zlog.Info(), INFO)
 }
 
-func Warn(ctx context.Context) *LoggerEvent {
+func Warn(ctx context.Context) LoggerEvent {
 	return CreateLoggerEvent(ctx, zlog.Warn(), WARN)
 }
 
-func Error(ctx context.Context) *LoggerEvent {
+func Error(ctx context.Context) LoggerEvent {
 	return CreateLoggerEvent(ctx, zlog.Error(), ERROR)
 }
 
-func Fatal(ctx context.Context) *LoggerEvent {
+func Fatal(ctx context.Context) LoggerEvent {
 	return CreateLoggerEvent(ctx, zlog.Fatal(), FATAL)
 }
 
-func CreateLoggerEvent(ctx context.Context, event *zerolog.Event, level Level) *LoggerEvent {
-	loggerEvent := &LoggerEvent{
+func CreateLoggerEvent(ctx context.Context, event *zerolog.Event, level Level) LoggerEvent {
+	loggerEvent := LoggerEvent{
 		event: event,
 		level: level,
 	}

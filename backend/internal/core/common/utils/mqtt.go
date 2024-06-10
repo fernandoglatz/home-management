@@ -48,7 +48,7 @@ func ConnectToMQTT(ctx context.Context) error {
 	return nil
 }
 
-func (mqttBroker *MqttBrokerType) Publish(ctx context.Context, topic string, object any) error {
+func (mqttBroker MqttBrokerType) Publish(ctx context.Context, topic string, object any) error {
 	jsonData, err := json.Marshal(object)
 	if err != nil {
 		return err
@@ -66,7 +66,7 @@ func (mqttBroker *MqttBrokerType) Publish(ctx context.Context, topic string, obj
 	return nil
 }
 
-func (mqttBroker *MqttBrokerType) Subscribe(ctx context.Context, topic string, callback mqtt.MessageHandler) error {
+func (mqttBroker MqttBrokerType) Subscribe(ctx context.Context, topic string, callback mqtt.MessageHandler) error {
 	log.Info(ctx).Msg("Subscribing to topic [" + topic + "]")
 
 	client := mqttBroker.Client

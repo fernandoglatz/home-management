@@ -6,6 +6,6 @@ type User struct {
 	Name   string `json:"name,omitempty" bson:"name,omitempty"`
 }
 
-func (user *User) GetCollectionName() string {
+func (user User) GetCollectionName() string {
 	return "users"
 }

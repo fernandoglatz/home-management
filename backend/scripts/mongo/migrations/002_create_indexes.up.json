@@ -1,6 +1,6 @@
 [
   {
-    "createIndexes": "users",
+    "createIndexes": "homes",
     "indexes": [
       {
         "name": "id",
@@ -10,23 +10,10 @@
         "unique": true
       },
       {
-        "name": "email",
+        "name": "createdAt",
         "key": {
-          "email": 1
-        },
-        "unique": true
-      }
-    ]
-  },
-  {
-    "createIndexes": "homes",
-    "indexes": [
-      {
-        "name": "id",
-        "key": {
-          "id": 1
-        },
-        "unique": true
+          "createdAt": -1
+        }
       }
     ]
   },
@@ -39,6 +26,12 @@
           "id": 1
         },
         "unique": true
+      },
+      {
+        "name": "createdAt",
+        "key": {
+          "createdAt": -1
+        }
       }
     ]
   },
@@ -51,6 +44,20 @@
           "id": 1
         },
         "unique": true
+      },
+      {
+        "name": "name",
+        "key": {
+          "home": 1,
+          "name": 1
+        },
+        "unique": true
+      },
+      {
+        "name": "createdAt",
+        "key": {
+          "createdAt": -1
+        }
       }
     ]
   }

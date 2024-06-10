@@ -70,7 +70,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.Event"
+                            "$ref": "#/definitions/request.EventRequest"
                         }
                     }
                 ],
@@ -160,7 +160,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.Event"
+                            "$ref": "#/definitions/request.EventRequest"
                         }
                     }
                 ],
@@ -210,7 +210,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.Event"
+                            "$ref": "#/definitions/request.EventRequest"
                         }
                     }
                 ],
@@ -295,7 +295,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.Event"
+                            "$ref": "#/definitions/request.EventRequest"
                         }
                     }
                 ],
@@ -388,6 +388,9 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "string"
                 },
+                "date": {
+                    "type": "string"
+                },
                 "device": {
                     "type": "string"
                 },
@@ -432,6 +435,26 @@ const docTemplate = `{
                 "GET_INFO",
                 "ACTION_UNRECOGNIZED"
             ]
+        },
+        "request.EventRequest": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "device": {
+                    "type": "string"
+                },
+                "home": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/event.Type"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
         },
         "response.Response": {
             "type": "object",

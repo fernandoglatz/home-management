@@ -65,7 +65,7 @@ func LoggingMiddleware() gin.HandlerFunc {
 }
 
 func RecoveryMiddleware(ctx context.Context) gin.HandlerFunc {
-	errorLogWriter := log.NewLogWritter(*log.Error(ctx))
+	errorLogWriter := log.NewLogWritter(log.Error(ctx))
 	return gin.CustomRecoveryWithWriter(errorLogWriter, errorHandleRecovery)
 }
 

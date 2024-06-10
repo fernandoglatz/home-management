@@ -15,7 +15,7 @@ import (
 var MongoDatabase MongoDatabaseType
 
 type MongoDatabaseType struct {
-	Client      *mongo.Database
+	Client      mongo.Database
 	collections map[string]*mongo.Collection
 }
 
@@ -57,14 +57,14 @@ func ConnectToMongoDB(ctx context.Context) error {
 	}
 
 	MongoDatabase = MongoDatabaseType{
-		Client:      client.Database(databaseName),
+		Client:      *client.Database(databaseName),
 		collections: make(map[string]*mongo.Collection),
 	}
 
 	return nil
 }
 
-func (mongoDatabase MongoDatabaseType) GetCollection(collectionName string) *mongo.Collection {
+func (mongoDatabase MongoDatabaseType) GetCollection(collectionName string) mongo.Collection {
 	collection := mongoDatabase.collections[collectionName]
 
 	if collection == nil {
@@ -72,5 +72,5 @@ func (mongoDatabase MongoDatabaseType) GetCollection(collectionName string) *mon
 		mongoDatabase.collections[collectionName] = collection
 	}
 
-	return collection
+	return *collection
 }

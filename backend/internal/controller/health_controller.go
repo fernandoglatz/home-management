@@ -9,8 +9,8 @@ import (
 type HealthController struct {
 }
 
-func NewHealthController() *HealthController {
-	return &HealthController{}
+func NewHealthController() HealthController {
+	return HealthController{}
 }
 
 // @Tags	health
@@ -20,6 +20,6 @@ func NewHealthController() *HealthController {
 // @Failure	400	{object}	string
 // @Failure	500	{object}	string
 // @Router	/health [get]
-func (healthController *HealthController) Health(ginCtx *gin.Context) {
+func (healthController HealthController) Health(ginCtx *gin.Context) {
 	ginCtx.String(http.StatusOK, "OK")
 }

@@ -14,7 +14,7 @@ import (
 var RedisDatabase RedisDatabaseType
 
 type RedisDatabaseType struct {
-	Client *redis.Client
+	Client redis.Client
 	Prefix string
 }
 
@@ -30,7 +30,7 @@ func ConnectToRedis(ctx context.Context) error {
 	client := redis.NewClient(redisOptions)
 
 	RedisDatabase = RedisDatabaseType{
-		Client: client,
+		Client: *client,
 		Prefix: redisConfig.Prefix,
 	}
 
@@ -44,22 +44,22 @@ func ConnectToRedis(ctx context.Context) error {
 	return err
 }
 
-func (redisDatabase *RedisDatabaseType) Get(ctx context.Context, key string) *redis.StringCmd {
+func (redisDatabase RedisDatabaseType) Get(ctx context.Context, key string) *redis.StringCmd {
 	completeKey := redisDatabase.getCompleteKey(key)
 	return redisDatabase.Client.Get(ctx, completeKey)
 }
 
-func (redisDatabase *RedisDatabaseType) Set(ctx context.Context, key string, value any, expiration time.Duration) error {
+func (redisDatabase RedisDatabaseType) Set(ctx context.Context, key string, value any, expiration time.Duration) error {
 	completeKey := redisDatabase.getCompleteKey(key)
 	return redisDatabase.Client.Set(ctx, completeKey, value, expiration).Err()
 }
 
-func (redisDatabase *RedisDatabaseType) Del(ctx context.Context, key string) error {
+func (redisDatabase RedisDatabaseType) Del(ctx context.Context, key string) error {
 	completeKey := redisDatabase.getCompleteKey(key)
 	return redisDatabase.Client.Del(ctx, completeKey).Err()
 }
 
-func (redisDatabase *RedisDatabaseType) GetStruct(ctx context.Context, key string, value any) error {
+func (redisDatabase RedisDatabaseType) GetStruct(ctx context.Context, key string, value any) error {
 	completeKey := redisDatabase.getCompleteKey(key)
 	cmd := redisDatabase.Get(ctx, completeKey)
 
@@ -78,7 +78,7 @@ func (redisDatabase *RedisDatabaseType) GetStruct(ctx context.Context, key strin
 	return nil
 }
 
-func (redisDatabase *RedisDatabaseType) SetStruct(ctx context.Context, key string, value any, expiration time.Duration) error {
+func (redisDatabase RedisDatabaseType) SetStruct(ctx context.Context, key string, value any, expiration time.Duration) error {
 	jsonData, err := json.Marshal(value)
 	if err != nil {
 		return err
@@ -90,6 +90,6 @@ func (redisDatabase *RedisDatabaseType) SetStruct(ctx context.Context, key strin
 	return result
 }
 
-func (redisDatabase *RedisDatabaseType) getCompleteKey(key string) string {
+func (redisDatabase RedisDatabaseType) getCompleteKey(key string) string {
 	return redisDatabase.Prefix + constants.COLON + key
 }

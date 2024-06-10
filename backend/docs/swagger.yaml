@@ -4,6 +4,8 @@ definitions:
     properties:
       createdAt:
         type: string
+      date:
+        type: string
       device:
         type: string
       home:
@@ -39,6 +41,19 @@ definitions:
     - GET_CONFIG
     - GET_INFO
     - ACTION_UNRECOGNIZED
+  request.EventRequest:
+    properties:
+      date:
+        type: string
+      device:
+        type: string
+      home:
+        type: string
+      type:
+        $ref: '#/definitions/event.Type'
+      version:
+        type: string
+    type: object
   response.Response:
     properties:
       code:
@@ -85,7 +100,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/entity.Event'
+          $ref: '#/definitions/request.EventRequest'
       produces:
       - application/json
       responses:
@@ -167,7 +182,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/entity.Event'
+          $ref: '#/definitions/request.EventRequest'
       produces:
       - application/json
       responses:
@@ -200,7 +215,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/entity.Event'
+          $ref: '#/definitions/request.EventRequest'
       produces:
       - application/json
       responses:
@@ -233,7 +248,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/entity.Event'
+          $ref: '#/definitions/request.EventRequest'
       produces:
       - application/json
       responses:
