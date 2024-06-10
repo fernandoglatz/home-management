@@ -5,6 +5,7 @@ import (
 	"fernandoglatz/home-management/internal/core/common/utils/constants"
 	"fernandoglatz/home-management/internal/core/common/utils/exceptions"
 	"fernandoglatz/home-management/internal/infrastructure/config/format"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -13,7 +14,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
+	zlog "github.com/rs/zerolog/log"
 )
 
 var currentLevel = TRACE
@@ -42,6 +43,7 @@ const (
 	TIMESTAMP_LOG_FORMAT = "2006-01-02T15:04:05.999Z07:00"
 
 	DEFAULT_CALLER_LEVEL = 2
+	PANIC_CALLER_LEVEL   = 3
 )
 
 func SetupLogger(profile string) {
@@ -52,6 +54,39 @@ func SetupLogger(profile string) {
 		setLoggerText(true)
 	} else {
 		setLoggerJson()
+	}
+}
+
+func HandlePanic(ctx context.Context) {
+	if recover := recover(); recover != nil {
+		caller := constants.EMPTY
+
+		_, file, no, ok := runtime.Caller(PANIC_CALLER_LEVEL)
+		if ok {
+			file = filepath.Base(file)
+			caller = file + ":" + strconv.Itoa(no)
+		}
+
+		message := fmt.Sprintf("%v", recover)
+		stacktrace := getStackTrace()
+		loggerEvent := Error(ctx)
+
+		if caller != constants.EMPTY {
+			loggerEvent.Caller(caller)
+		}
+
+		loggerEvent.PutTraceMap("stacktrace", stacktrace).Msg(message)
+	}
+}
+
+func getStackTrace() string {
+	buf := make([]byte, 1024)
+	for {
+		n := runtime.Stack(buf, false)
+		if n < len(buf) {
+			return string(buf[:n])
+		}
+		buf = make([]byte, len(buf)*2)
 	}
 }
 
@@ -92,7 +127,7 @@ func setCurrentLevel(level string) {
 func setLoggerJson() {
 	currentFormat = format.JSON
 	zerolog.TimeFieldFormat = TIMESTAMP_LOG_FORMAT
-	log.Logger = zerolog.New(os.Stdout)
+	zlog.Logger = zerolog.New(os.Stdout)
 }
 
 func setLoggerText(colored bool) {
@@ -102,7 +137,7 @@ func setLoggerText(colored bool) {
 		TimeFormat: TIMESTAMP_LOG_FORMAT,
 		NoColor:    !colored,
 	}
-	log.Logger = zerolog.New(output).With().Timestamp().Logger()
+	zlog.Logger = zerolog.New(output).With().Timestamp().Logger()
 }
 
 func IsLevelEnabled(level Level) bool {
@@ -156,27 +191,27 @@ func (loggerEvent *LoggerEvent) Msg(msg string) {
 }
 
 func Trace(ctx context.Context) *LoggerEvent {
-	return CreateLoggerEvent(ctx, log.Trace(), TRACE)
+	return CreateLoggerEvent(ctx, zlog.Trace(), TRACE)
 }
 
 func Debug(ctx context.Context) *LoggerEvent {
-	return CreateLoggerEvent(ctx, log.Debug(), DEBUG)
+	return CreateLoggerEvent(ctx, zlog.Debug(), DEBUG)
 }
 
 func Info(ctx context.Context) *LoggerEvent {
-	return CreateLoggerEvent(ctx, log.Info(), INFO)
+	return CreateLoggerEvent(ctx, zlog.Info(), INFO)
 }
 
 func Warn(ctx context.Context) *LoggerEvent {
-	return CreateLoggerEvent(ctx, log.Warn(), WARN)
+	return CreateLoggerEvent(ctx, zlog.Warn(), WARN)
 }
 
 func Error(ctx context.Context) *LoggerEvent {
-	return CreateLoggerEvent(ctx, log.Error(), ERROR)
+	return CreateLoggerEvent(ctx, zlog.Error(), ERROR)
 }
 
 func Fatal(ctx context.Context) *LoggerEvent {
-	return CreateLoggerEvent(ctx, log.Fatal(), FATAL)
+	return CreateLoggerEvent(ctx, zlog.Fatal(), FATAL)
 }
 
 func CreateLoggerEvent(ctx context.Context, event *zerolog.Event, level Level) *LoggerEvent {
@@ -188,6 +223,8 @@ func CreateLoggerEvent(ctx context.Context, event *zerolog.Event, level Level) *
 	traceObj := ctx.Value(constants.TRACE_MAP)
 	if traceObj != nil {
 		loggerEvent.traceMap = traceObj.(map[string]any)
+	} else {
+		loggerEvent.traceMap = make(map[string]any)
 	}
 
 	_, file, no, ok := runtime.Caller(DEFAULT_CALLER_LEVEL)

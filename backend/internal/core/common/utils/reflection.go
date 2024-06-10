@@ -6,7 +6,7 @@ import (
 )
 
 func GetTypeName(object any) string {
-	return reflect.TypeOf(object).Name()
+	return reflect.TypeOf(object).String()
 }
 
 func CopyStructFields(source any, destination any) error {

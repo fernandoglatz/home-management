@@ -2,12 +2,13 @@ package repository
 
 import (
 	"context"
+	"fernandoglatz/home-management/internal/core/common/utils"
 	"fernandoglatz/home-management/internal/core/common/utils/exceptions"
 	"fernandoglatz/home-management/internal/core/entity"
 	"sync"
 )
 
-var eventRepository any
+var eventRepositories map[string]any
 var eventRepositoryMutex sync.Mutex
 
 type EventRepository[T entity.IEntity] struct {
@@ -15,8 +16,17 @@ type EventRepository[T entity.IEntity] struct {
 }
 
 func GetEventRepository[T entity.IEntity]() EventRepository[T] {
+	var entity T
+	typeName := utils.GetTypeName(entity)
+
 	eventRepositoryMutex.Lock()
 	defer eventRepositoryMutex.Unlock()
+
+	if eventRepositories == nil {
+		eventRepositories = make(map[string]any)
+	}
+
+	eventRepository := eventRepositories[typeName]
 
 	if eventRepository == nil {
 		repository := GetGenericRepository[T]()
@@ -24,6 +34,8 @@ func GetEventRepository[T entity.IEntity]() EventRepository[T] {
 		eventRepository = EventRepository[T]{
 			repository: repository,
 		}
+
+		eventRepositories[typeName] = eventRepository
 	}
 
 	return eventRepository.(EventRepository[T])

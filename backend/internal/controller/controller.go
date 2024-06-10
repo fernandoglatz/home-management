@@ -177,7 +177,8 @@ func (controller *Controller[T]) Patch(ginCtx *gin.Context) {
 	err := ginCtx.ShouldBindJSON(&jsonData)
 	if err != nil {
 		errw := &exceptions.WrappedError{
-			Error: err,
+			BaseError: exceptions.InvalidJSON,
+			Error:     err,
 		}
 
 		HandleError(ctx, ginCtx, errw)

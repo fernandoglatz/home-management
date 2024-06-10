@@ -5,6 +5,8 @@ import (
 	"fernandoglatz/home-management/internal/core/common/utils"
 	"fernandoglatz/home-management/internal/core/common/utils/constants"
 	"fernandoglatz/home-management/internal/core/common/utils/log"
+	"fernandoglatz/home-management/internal/core/entity"
+	"fernandoglatz/home-management/internal/core/service"
 	"fernandoglatz/home-management/internal/infrastructure/config"
 	"strings"
 
@@ -51,7 +53,17 @@ func Setup(ctx context.Context) error {
 
 func onRabbitMqEventMessageReceived(queue string, delivery amqp.Delivery) error {
 	ctx := context.Background()
-	ctx.Value("x")
+	defer log.HandlePanic(ctx)
+
+	eventService := service.GetEventService[*entity.Event]()
+	body := delivery.Body
+	errw := eventService.ProcessMessage(ctx, body)
+
+	if errw != nil {
+		json := string(body)
+		log.Error(ctx).PutTraceMap("json", json).Msg("Error on processing event message: " + errw.GetMessage())
+		return errw.Error
+	}
 
 	return nil
 }
