@@ -3,22 +3,31 @@ package controller
 import (
 	"fernandoglatz/home-management/internal/core/entity"
 	"fernandoglatz/home-management/internal/core/service"
-	"fernandoglatz/home-management/internal/infrastructure/repository"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 )
 
-type EventController struct {
-	controller Controller[*entity.Event]
+var eventController any
+var eventControllerMutex sync.Mutex
+
+type EventController[T entity.IEntity] struct {
+	controller Controller[T]
 }
 
-func NewEventController() EventController {
-	eventRepository := repository.NewRepository[*entity.Event](&entity.Event{})
-	eventService := service.NewService[*entity.Event](*eventRepository)
+func GetEventController[T entity.IEntity]() EventController[T] {
+	eventControllerMutex.Lock()
+	defer eventControllerMutex.Unlock()
 
-	return EventController{
-		controller: NewController[*entity.Event]("event", eventService),
+	if eventController == nil {
+		eventService := service.GetEventService[T]()
+
+		eventController = EventController[T]{
+			controller: GetController[T](&eventService),
+		}
 	}
+
+	return eventController.(EventController[T])
 }
 
 // @Tags	event
@@ -28,7 +37,7 @@ func NewEventController() EventController {
 // @Failure	400	{object}	response.Response
 // @Failure	500	{object}	response.Response
 // @Router	/event [get]
-func (eventController *EventController) Get(ginCtx *gin.Context) {
+func (eventController *EventController[T]) Get(ginCtx *gin.Context) {
 	eventController.controller.Get(ginCtx)
 }
 
@@ -40,7 +49,7 @@ func (eventController *EventController) Get(ginCtx *gin.Context) {
 // @Failure	400	{object}	response.Response
 // @Failure	500	{object}	response.Response
 // @Router	/event/{id} [get]
-func (eventController *EventController) GetById(ginCtx *gin.Context) {
+func (eventController *EventController[T]) GetById(ginCtx *gin.Context) {
 	eventController.controller.GetById(ginCtx)
 }
 
@@ -54,7 +63,7 @@ func (eventController *EventController) GetById(ginCtx *gin.Context) {
 // @Failure	400	{object}	response.Response
 // @Failure	500	{object}	response.Response
 // @Router		/event/{id} [post]
-func (eventController *EventController) Post(ginCtx *gin.Context) {
+func (eventController *EventController[T]) Post(ginCtx *gin.Context) {
 	eventController.controller.Post(ginCtx)
 }
 
@@ -67,7 +76,7 @@ func (eventController *EventController) Post(ginCtx *gin.Context) {
 // @Failure	400	{object}	response.Response
 // @Failure	500	{object}	response.Response
 // @Router		/event [put]
-func (eventController *EventController) Put(ginCtx *gin.Context) {
+func (eventController *EventController[T]) Put(ginCtx *gin.Context) {
 	eventController.controller.Put(ginCtx)
 }
 
@@ -81,7 +90,7 @@ func (eventController *EventController) Put(ginCtx *gin.Context) {
 // @Failure	400	{object}	response.Response
 // @Failure	500	{object}	response.Response
 // @Router		/event/{id} [put]
-func (eventController *EventController) PutById(ginCtx *gin.Context) {
+func (eventController *EventController[T]) PutById(ginCtx *gin.Context) {
 	eventController.controller.PutById(ginCtx)
 }
 
@@ -95,7 +104,7 @@ func (eventController *EventController) PutById(ginCtx *gin.Context) {
 // @Failure	400	{object}	response.Response
 // @Failure	500	{object}	response.Response
 // @Router		/event/{id} [patch]
-func (eventController *EventController) Patch(ginCtx *gin.Context) {
+func (eventController *EventController[T]) Patch(ginCtx *gin.Context) {
 	eventController.controller.Patch(ginCtx)
 }
 
@@ -107,7 +116,7 @@ func (eventController *EventController) Patch(ginCtx *gin.Context) {
 // @Failure	400	{object}	response.Response
 // @Failure	500	{object}	response.Response
 // @Router	/event/{id} [delete]
-func (eventController *EventController) DeleteById(ginCtx *gin.Context) {
+func (eventController *EventController[T]) DeleteById(ginCtx *gin.Context) {
 	eventController.controller.DeleteById(ginCtx)
 }
 
@@ -118,6 +127,6 @@ func (eventController *EventController) DeleteById(ginCtx *gin.Context) {
 // @Failure	404
 // @Failure	500
 // @Router		/v1/events/{id} [head]
-func (eventController *EventController) Head(ginCtx *gin.Context) {
+func (eventController *EventController[T]) Head(ginCtx *gin.Context) {
 	eventController.controller.Head(ginCtx)
 }

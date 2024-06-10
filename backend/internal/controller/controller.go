@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+	"sync"
 
 	_ "fernandoglatz/home-management/docs"
 	"fernandoglatz/home-management/internal/core/common/utils"
@@ -14,21 +15,65 @@ import (
 	"fernandoglatz/home-management/internal/core/common/utils/log"
 	"fernandoglatz/home-management/internal/core/entity"
 	"fernandoglatz/home-management/internal/core/model/response"
+	service_port "fernandoglatz/home-management/internal/core/port/service"
 	"fernandoglatz/home-management/internal/core/service"
 
 	"github.com/gin-gonic/gin"
 )
 
-type Controller[T entity.IEntity] struct {
-	basePath string
-	service  service.Service[T]
+type IController[T entity.IEntity] interface {
+	Get(ginCtx *gin.Context)
+	GetById(ginCtx *gin.Context)
+	Post(ginCtx *gin.Context)
+	Put(ginCtx *gin.Context)
+	PutById(ginCtx *gin.Context)
+	DeleteById(ginCtx *gin.Context)
+	Patch(ginCtx *gin.Context)
+	Head(ginCtx *gin.Context)
 }
 
-func NewController[T entity.IEntity](basePath string, service service.Service[T]) Controller[T] {
-	return Controller[T]{
-		service:  service,
-		basePath: basePath,
+var controllers map[string]any
+var controllerMutex sync.Mutex
+
+type Controller[T entity.IEntity] struct {
+	service service_port.IService[T]
+}
+
+func GetGenericController[T entity.IEntity]() Controller[T] {
+	var entity T
+	typeName := utils.GetTypeName(entity)
+	controller := controllers[typeName]
+
+	if controller == nil {
+		service := service.GetGenericService[T]()
+		controller = GetController[T](&service)
 	}
+
+	return controller.(Controller[T])
+}
+
+func GetController[T entity.IEntity](service service_port.IService[T]) Controller[T] {
+	var entity T
+	typeName := utils.GetTypeName(entity)
+
+	controllerMutex.Lock()
+	defer controllerMutex.Unlock()
+
+	if controllers == nil {
+		controllers = make(map[string]any)
+	}
+
+	controller := controllers[typeName]
+
+	if controller == nil {
+		controller = Controller[T]{
+			service: service,
+		}
+
+		controllers[typeName] = controller
+	}
+
+	return controller.(Controller[T])
 }
 
 func (controller *Controller[T]) Get(ginCtx *gin.Context) {

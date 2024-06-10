@@ -21,26 +21,5 @@
       "write": ".*",
       "read": ".*"
     }
-  ],
-  "queues": [
-    {
-      "name": "home-management-events-queue",
-      "vhost": "/",
-      "durable": true,
-      "auto_delete": false,
-      "arguments": {
-        "x-queue-type": "classic"
-      }
-    }
-  ],
-  "bindings": [
-    {
-      "source": "amq.topic",
-      "vhost": "/",
-      "destination": "home-management-events-queue",
-      "destination_type": "queue",
-      "routing_key": "home-management.events",
-      "arguments": {}
-    }
   ]
 }

@@ -11,12 +11,34 @@ definitions:
       id:
         type: string
       type:
-        type: string
+        $ref: '#/definitions/event.Type'
       updatedAt:
         type: string
       version:
         type: string
     type: object
+  event.Type:
+    enum:
+    - RECEIVED_RF
+    - SEND_RF
+    - MQTT_CONNECTED
+    - RESTART
+    - RESET
+    - SET_CONFIG
+    - GET_CONFIG
+    - GET_INFO
+    - ACTION_UNRECOGNIZED
+    type: string
+    x-enum-varnames:
+    - RECEIVED_RF
+    - SEND_RF
+    - MQTT_CONNECTED
+    - RESTART
+    - RESET
+    - SET_CONFIG
+    - GET_CONFIG
+    - GET_INFO
+    - ACTION_UNRECOGNIZED
   response.Response:
     properties:
       code:

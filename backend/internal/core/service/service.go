@@ -2,20 +2,45 @@ package service
 
 import (
 	"context"
+	"sync"
 
+	"fernandoglatz/home-management/internal/core/common/utils"
 	"fernandoglatz/home-management/internal/core/common/utils/exceptions"
 	"fernandoglatz/home-management/internal/core/entity"
+	repository_port "fernandoglatz/home-management/internal/core/port/repository"
 	"fernandoglatz/home-management/internal/infrastructure/repository"
 )
 
+var services map[string]any
+var serviceMutex sync.Mutex
+
 type Service[T entity.IEntity] struct {
-	repository repository.Repository[T]
+	repository repository_port.IRepository[T]
 }
 
-func NewService[T entity.IEntity](repository repository.Repository[T]) Service[T] {
-	return Service[T]{
-		repository: repository,
+func GetGenericService[T entity.IEntity]() Service[T] {
+	var entity T
+	typeName := utils.GetTypeName(entity)
+
+	serviceMutex.Lock()
+	defer serviceMutex.Unlock()
+
+	if services == nil {
+		services = make(map[string]any)
 	}
+
+	service := services[typeName]
+
+	if service == nil {
+		repository := repository.GetGenericRepository[T]()
+		service = Service[T]{
+			repository: &repository,
+		}
+
+		services[typeName] = service
+	}
+
+	return service.(Service[T])
 }
 
 func (service *Service[T]) Get(ctx context.Context, id string) (T, *exceptions.WrappedError) {

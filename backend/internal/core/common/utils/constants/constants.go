@@ -12,9 +12,16 @@ const (
 	ID         string = "id"
 	REQUEST_ID string = "REQUEST-ID"
 
-	ZERO = 0
-	ONE  = 1
-	TEN  = 10
+	MINUS_ONE = -1
+	ZERO      = 0
+	ONE       = 1
+	TEN       = 10
 
-	EMPTY = ""
+	EMPTY    = ""
+	SLASH    = "/"
+	DOT      = "."
+	PLUS     = "+"
+	ASTERISK = "*"
+	HASH     = "#"
+	COLON    = ":"
 )

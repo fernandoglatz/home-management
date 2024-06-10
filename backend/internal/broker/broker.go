@@ -2,44 +2,46 @@ package broker
 
 import (
 	"context"
-	"encoding/json"
 	"fernandoglatz/home-management/internal/core/common/utils"
+	"fernandoglatz/home-management/internal/core/common/utils/constants"
 	"fernandoglatz/home-management/internal/core/common/utils/log"
-	"fernandoglatz/home-management/internal/core/entity"
 	"fernandoglatz/home-management/internal/infrastructure/config"
+	"strings"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
+const AMQ_TOPIC = "amq.topic"
+
 func Setup(ctx context.Context) error {
 	mqttBroker := utils.MqttBroker
 	rabbitMqBroker := utils.RabbitMqBroker
 
-	topic := config.ApplicationConfig.Broker.Mqtt.Topics.Broadcast
-	err := mqttBroker.Subscribe(ctx, topic, onMqttBroadCastMessageReceived)
+	topics := config.ApplicationConfig.Broker.Mqtt.Topics
+	queues := config.ApplicationConfig.Broker.RabbitMQ.Queues
+
+	topicBroadcast := topics.Broadcast
+	topicEvents := topics.Events
+	queueEvents := queues.Events
+	routingKeyEvents := getRoutingKey(topicEvents)
+
+	err := mqttBroker.Subscribe(ctx, topicBroadcast, onMqttBroadCastMessageReceived)
 	if err != nil {
 		return err
 	}
 
-	err = rabbitMqBroker.CreateQueue(ctx, "teste")
+	err = rabbitMqBroker.CreateQueue(ctx, queueEvents)
 	if err != nil {
 		return err
 	}
 
-	err = rabbitMqBroker.CreateExchange(ctx, "teste-exchange")
+	err = rabbitMqBroker.Bind(ctx, queueEvents, routingKeyEvents, AMQ_TOPIC)
 	if err != nil {
 		return err
 	}
 
-	user := entity.User{Name: "Fernando"}
-
-	err = rabbitMqBroker.PublishQueue(ctx, "teste", user)
-	if err != nil {
-		return err
-	}
-
-	err = rabbitMqBroker.Subscribe(ctx, "teste", onRabbitMqMessageReceived)
+	err = rabbitMqBroker.Subscribe(ctx, queueEvents, onRabbitMqEventMessageReceived)
 	if err != nil {
 		return err
 	}
@@ -47,12 +49,9 @@ func Setup(ctx context.Context) error {
 	return nil
 }
 
-func onRabbitMqMessageReceived(queue string, delivery amqp.Delivery) error {
+func onRabbitMqEventMessageReceived(queue string, delivery amqp.Delivery) error {
 	ctx := context.Background()
-	jsonData, _ := json.Marshal(delivery)
-	json := string(jsonData)
-
-	log.Info(ctx).Msg("Mensagem da fila: " + json)
+	ctx.Value("x")
 
 	return nil
 }
@@ -63,4 +62,9 @@ func onMqttBroadCastMessageReceived(client mqtt.Client, msg mqtt.Message) {
 	payloadStr := string(payload)
 
 	log.Info(ctx).Msg("Received MQTT message [" + payloadStr + "]")
+}
+
+func getRoutingKey(topic string) string {
+	routingKey := strings.Replace(topic, constants.SLASH, constants.DOT, constants.MINUS_ONE)
+	return strings.Replace(routingKey, constants.PLUS, constants.ASTERISK, constants.MINUS_ONE)
 }

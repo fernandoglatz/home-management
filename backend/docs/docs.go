@@ -398,7 +398,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "type": "string"
+                    "$ref": "#/definitions/event.Type"
                 },
                 "updatedAt": {
                     "type": "string"
@@ -407,6 +407,31 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "event.Type": {
+            "type": "string",
+            "enum": [
+                "RECEIVED_RF",
+                "SEND_RF",
+                "MQTT_CONNECTED",
+                "RESTART",
+                "RESET",
+                "SET_CONFIG",
+                "GET_CONFIG",
+                "GET_INFO",
+                "ACTION_UNRECOGNIZED"
+            ],
+            "x-enum-varnames": [
+                "RECEIVED_RF",
+                "SEND_RF",
+                "MQTT_CONNECTED",
+                "RESTART",
+                "RESET",
+                "SET_CONFIG",
+                "GET_CONFIG",
+                "GET_INFO",
+                "ACTION_UNRECOGNIZED"
+            ]
         },
         "response.Response": {
             "type": "object",

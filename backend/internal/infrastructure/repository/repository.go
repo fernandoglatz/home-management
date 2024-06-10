@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"strings"
+	"sync"
 	"time"
 
 	"fernandoglatz/home-management/internal/core/common/utils"
@@ -15,15 +16,36 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+var repositories map[string]any
+var repositoryMutex sync.Mutex
+
 type Repository[T entity.IEntity] struct {
 	collection *mongo.Collection
 }
 
-func NewRepository[T entity.IEntity](baseEntity T) *Repository[T] {
-	collectionName := baseEntity.GetCollectionName()
-	return &Repository[T]{
-		collection: utils.MongoDatabase.GetCollection(collectionName),
+func GetGenericRepository[T entity.IEntity]() Repository[T] {
+	var entity T
+	typeName := utils.GetTypeName(entity)
+
+	repositoryMutex.Lock()
+	defer repositoryMutex.Unlock()
+
+	if repositories == nil {
+		repositories = make(map[string]any)
 	}
+
+	repository := repositories[typeName]
+
+	if repository == nil {
+		collectionName := entity.GetCollectionName()
+		repository = Repository[T]{
+			collection: utils.MongoDatabase.GetCollection(collectionName),
+		}
+
+		repositories[typeName] = repository
+	}
+
+	return repository.(Repository[T])
 }
 
 func (repository *Repository[T]) Get(ctx context.Context, id string) (T, *exceptions.WrappedError) {
@@ -45,16 +67,16 @@ func (repository *Repository[T]) getByFilter(ctx context.Context, filter any) (T
 		}
 	}
 
-	repository.correctTimezone(&entity)
+	repository.CorrecTimezone(&entity)
 	return entity, nil
 }
 
 func (repository *Repository[T]) GetAll(ctx context.Context) ([]T, *exceptions.WrappedError) {
-	var entitys []T = []T{}
+	var entities []T = []T{}
 
 	cursor, err := repository.collection.Find(ctx, bson.D{})
 	if err != nil {
-		return entitys, &exceptions.WrappedError{
+		return entities, &exceptions.WrappedError{
 			Error: err,
 		}
 	}
@@ -65,16 +87,16 @@ func (repository *Repository[T]) GetAll(ctx context.Context) ([]T, *exceptions.W
 		var entity T
 		err = cursor.Decode(&entity)
 		if err != nil {
-			return entitys, &exceptions.WrappedError{
+			return entities, &exceptions.WrappedError{
 				Error: err,
 			}
 		}
 
-		repository.correctTimezone(&entity)
-		entitys = append(entitys, entity)
+		repository.CorrecTimezone(&entity)
+		entities = append(entities, entity)
 	}
 
-	return entitys, nil
+	return entities, nil
 }
 
 func (repository *Repository[T]) Save(ctx context.Context, entity *T) *exceptions.WrappedError {
@@ -124,7 +146,8 @@ func (repository *Repository[T]) Remove(ctx context.Context, entity T) *exceptio
 
 	return nil
 }
-func (repository *Repository[T]) correctTimezone(entity *T) {
+
+func (repository *Repository[T]) CorrecTimezone(entity *T) {
 	location, _ := time.LoadLocation(utils.GetTimezone())
 
 	createdAt := (*entity).GetCreatedAt()

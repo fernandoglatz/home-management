@@ -2,6 +2,11 @@ server:
   listening: "0.0.0.0:8080"
   context-path: "/api"
 
+application:
+  processing:
+    rf-events:
+      merge-period: 5s
+
 data:
   mongo:
     uri: "mongodb://host.docker.internal:27017"
@@ -10,6 +15,7 @@ data:
   redis:
     address: "localhost:6379"
     password: ""
+    prefix: "home-management"
     db: 0
     ttl:
       rf-event: 1m
@@ -23,6 +29,7 @@ broker:
     topics:
       broadcast: "home-management/broadcast"
       devices: "home-management/devices"
+      events: "home-management/events"
 
   rabbitmq:
     uri: "amqp://guest:guest@localhost:5672/"

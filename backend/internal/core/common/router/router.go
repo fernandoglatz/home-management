@@ -6,6 +6,7 @@ import (
 	"fernandoglatz/home-management/internal/controller"
 	"fernandoglatz/home-management/internal/core/common/utils/constants"
 	"fernandoglatz/home-management/internal/core/common/utils/log"
+	"fernandoglatz/home-management/internal/core/entity"
 	"fernandoglatz/home-management/internal/infrastructure/config"
 
 	"github.com/gin-gonic/gin"
@@ -20,8 +21,8 @@ func Setup(ctx context.Context, engine *gin.Engine) {
 	router := engine.Group(contextPath)
 
 	healthController := controller.NewHealthController()
+	eventController := controller.GetEventController[*entity.Event]()
 
-	eventController := controller.NewEventController()
 	routerEvent := router.Group("/event")
 	routerEvent.GET(constants.EMPTY, eventController.Get)
 	routerEvent.GET(":id", eventController.GetById)

@@ -18,6 +18,14 @@ type Config struct {
 		ContextPath string `yaml:"context-path"`
 	} `yaml:"server"`
 
+	Application struct {
+		Processing struct {
+			RfEvents struct {
+				MergePeriod time.Duration `yaml:"merge-period"`
+			} `yaml:"rf-events"`
+		} `yaml:"processing"`
+	} `yaml:"application"`
+
 	Data struct {
 		Mongo struct {
 			Uri      string `yaml:"uri"`
@@ -27,6 +35,7 @@ type Config struct {
 		Redis struct {
 			Address  string `yaml:"address"`
 			Password string `yaml:"password"`
+			Prefix   string `yaml:"prefix"`
 			Db       int    `yaml:"db"`
 
 			TTL struct {
@@ -45,6 +54,7 @@ type Config struct {
 			Topics struct {
 				Broadcast string `yaml:"broadcast"`
 				Devices   string `yaml:"devices"`
+				Events    string `yaml:"events"`
 			} `yaml:"topics"`
 		} `yaml:"mqtt"`
 
@@ -52,10 +62,6 @@ type Config struct {
 			Uri      string `yaml:"uri"`
 			User     string `yaml:"user"`
 			Password string `yaml:"password"`
-
-			Exchanges struct {
-				Events string `yaml:"events"`
-			} `yaml:"exchanges"`
 
 			Queues struct {
 				Events string `yaml:"events"`

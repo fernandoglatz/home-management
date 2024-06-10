@@ -5,6 +5,10 @@ import (
 	"reflect"
 )
 
+func GetTypeName(object any) string {
+	return reflect.TypeOf(object).Name()
+}
+
 func CopyStructFields(source any, destination any) error {
 	sourceValue := reflect.ValueOf(source)
 	destinationValue := reflect.ValueOf(destination)
