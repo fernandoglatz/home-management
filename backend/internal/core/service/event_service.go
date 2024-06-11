@@ -177,6 +177,7 @@ func (eventService EventService[T]) processRfEvent(ctx context.Context, body []b
 	}
 
 	lastRfEvent.ReceiveCount = lastRfEvent.ReceiveCount + constants.ONE
+	lastRfEvent.Date = currentDate
 
 	errw := rfEventService.Save(ctx, &lastRfEvent)
 	if errw != nil {

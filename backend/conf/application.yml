@@ -5,7 +5,7 @@ server:
 application:
   processing:
     rf-events:
-      merge-period: 2s
+      merge-period: 5s
 
 data:
   mongo:
