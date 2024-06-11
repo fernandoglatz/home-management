@@ -16,6 +16,7 @@ const (
 	MINUS_ONE = -1
 	ZERO      = 0
 	ONE       = 1
+	FIVE      = 5
 	TEN       = 10
 
 	EMPTY    = ""

@@ -8,6 +8,7 @@ import (
 	"fernandoglatz/home-management/internal/infrastructure/config"
 	"fmt"
 	"strconv"
+	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -25,9 +26,10 @@ type RabbitMqBrokerType struct {
 	Channel    *amqp.Channel
 }
 
+type RabbitMqConnectHandler func(ctx context.Context) error
 type RabbitMqMessageHandler func(ctx context.Context, queue string, delivery amqp.Delivery) error
 
-func ConnectToRabbitMQ(ctx context.Context) error {
+func ConnectToRabbitMQ(ctx context.Context, callback RabbitMqConnectHandler) error {
 	log.Info(ctx).Msg("Connecting to RabbitMQ")
 
 	uri := config.ApplicationConfig.Broker.RabbitMQ.Uri
@@ -42,12 +44,58 @@ func ConnectToRabbitMQ(ctx context.Context) error {
 		return err
 	}
 
-	RabbitMqBroker = RabbitMqBrokerType{
-		Connection: connection,
-		Channel:    channel,
-	}
+	RabbitMqBroker.Connection = connection
+	RabbitMqBroker.Channel = channel
+
+	notify := make(chan *amqp.Error)
+	go func() {
+		err := <-notify
+		log.Error(ctx).Msg("Lost connection to RabbitMQ: " + err.Error())
+		reconnectToRabbitMQ(ctx, callback)
+	}()
+	connection.NotifyClose(notify)
 
 	log.Info(ctx).Msg("Connected to RabbitMQ!")
+
+	return callback(ctx)
+}
+
+func reconnectToRabbitMQ(ctx context.Context, callback RabbitMqConnectHandler) error {
+	for {
+		time.Sleep(constants.FIVE * time.Second)
+		log.Info(ctx).Msg("Reconnecting to RabbitMQ...")
+
+		uri := config.ApplicationConfig.Broker.RabbitMQ.Uri
+
+		connection, err := amqp.Dial(uri)
+		if err != nil {
+			continue
+		}
+
+		channel, err := connection.Channel()
+		if err != nil {
+			continue
+		}
+
+		RabbitMqBroker.Connection = connection
+		RabbitMqBroker.Channel = channel
+
+		log.Info(ctx).Msg("Reconnected to RabbitMQ!")
+
+		err = callback(ctx)
+
+		notify := make(chan *amqp.Error)
+		go func() {
+			err := <-notify
+			log.Error(ctx).Msg("Lost connection to RabbitMQ: " + err.Error())
+			reconnectToRabbitMQ(ctx, callback)
+		}()
+		connection.NotifyClose(notify)
+
+		if err == nil {
+			break
+		}
+	}
 
 	return nil
 }

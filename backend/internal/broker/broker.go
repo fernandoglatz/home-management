@@ -22,28 +22,44 @@ const CONFIG_QUEUE_EVENTS = "events"
 const X_DEAD_LETTER_EXCHANGE = "x-dead-letter-exchange"
 
 func Setup(ctx context.Context) error {
+	err := utils.ConnectToMQTT(ctx)
+	if err != nil {
+		return err
+	}
+
+	err = utils.ConnectToRabbitMQ(ctx, onRabbitMqConnected)
+	if err != nil {
+		return err
+	}
+
 	mqttBroker := utils.MqttBroker
+	topics := config.ApplicationConfig.Broker.Mqtt.Topics
+	topicBroadcast := topics.Broadcast
+
+	err = mqttBroker.Subscribe(ctx, topicBroadcast, onMqttBroadCastMessageReceived)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func onRabbitMqConnected(ctx context.Context) error {
 	rabbitMqBroker := utils.RabbitMqBroker
 
 	topics := config.ApplicationConfig.Broker.Mqtt.Topics
 	queues := config.ApplicationConfig.Broker.RabbitMQ.Queues
 
-	topicBroadcast := topics.Broadcast
 	topicEvents := topics.Events
 	queueEvents := queues[CONFIG_QUEUE_EVENTS]
 	routingKeyEvents := getRoutingKey(topicEvents)
-
-	err := mqttBroker.Subscribe(ctx, topicBroadcast, onMqttBroadCastMessageReceived)
-	if err != nil {
-		return err
-	}
 
 	queue := queueEvents.Name
 	dlqQueue := queue + SUFFIX_DLQ
 	dlExchange := queue + SUFFIX_DLEX
 	requeueExchange := queueEvents.RequeueDelayExchange
 
-	err = rabbitMqBroker.CreateQueue(ctx, dlqQueue, nil)
+	err := rabbitMqBroker.CreateQueue(ctx, dlqQueue, nil)
 	if err != nil {
 		return err
 	}

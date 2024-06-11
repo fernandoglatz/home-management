@@ -23,7 +23,7 @@ data:
 broker:
   mqtt:
     uri: "tcp://localhost:1883"
-    client-id: "home-management-backend"
+    client-id: "home-management"
     user: "guest"
     password: "guest"
     topics:
