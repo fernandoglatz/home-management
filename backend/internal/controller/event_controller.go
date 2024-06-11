@@ -33,6 +33,8 @@ func GetEventController[T entity.IEvent, RQ request.EventRequest]() EventControl
 
 // @Tags	event
 // @Summary	Get events
+// @Param	page		query	string  true "page"
+// @Param	limit		query	string  true "limit"
 // @Produce	json
 // @Success	200	{array}		entity.Event
 // @Failure	400	{object}	response.Response

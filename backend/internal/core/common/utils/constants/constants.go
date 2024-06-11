@@ -11,6 +11,7 @@ const (
 
 	ID         string = "id"
 	REQUEST_ID string = "REQUEST-ID"
+	MESSAGE_ID string = "MESSAGE-ID"
 
 	MINUS_ONE = -1
 	ZERO      = 0

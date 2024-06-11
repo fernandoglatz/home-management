@@ -8,7 +8,7 @@ import (
 
 type IService[T entity.IEntity] interface {
 	Get(ctx context.Context, id string) (T, *exceptions.WrappedError)
-	GetAll(ctx context.Context) ([]T, *exceptions.WrappedError)
+	GetAll(ctx context.Context, page int, limit int) ([]T, *exceptions.WrappedError)
 	Save(ctx context.Context, entity T) *exceptions.WrappedError
 	Remove(ctx context.Context, entity T) *exceptions.WrappedError
 }

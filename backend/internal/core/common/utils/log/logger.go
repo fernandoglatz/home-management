@@ -145,7 +145,15 @@ func IsLevelEnabled(level Level) bool {
 }
 
 func (loggerEvent LoggerEvent) PutTraceMap(key string, value any) LoggerEvent {
-	loggerEvent.traceMap[key] = value
+	newTraceMap := make(map[string]any)
+
+	for key, value := range loggerEvent.traceMap {
+		newTraceMap[key] = value
+	}
+
+	newTraceMap[key] = value
+	loggerEvent.traceMap = newTraceMap
+
 	return loggerEvent
 }
 

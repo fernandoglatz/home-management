@@ -61,8 +61,8 @@ func (eventService EventService[T]) Get(ctx context.Context, id string) (T, *exc
 	return eventService.service.Get(ctx, id)
 }
 
-func (eventService EventService[T]) GetAll(ctx context.Context) ([]T, *exceptions.WrappedError) {
-	return eventService.service.GetAll(ctx)
+func (eventService EventService[T]) GetAll(ctx context.Context, page int, limit int) ([]T, *exceptions.WrappedError) {
+	return eventService.service.GetAll(ctx, page, limit)
 }
 
 func (eventService EventService[T]) Save(ctx context.Context, entity T) *exceptions.WrappedError {
@@ -158,6 +158,7 @@ func (eventService EventService[T]) processRfEvent(ctx context.Context, body []b
 
 		for _, event := range events {
 			lastDate = event.Date
+			break
 		}
 	}
 

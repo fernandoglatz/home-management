@@ -15,6 +15,11 @@ import (
 )
 
 const AMQ_TOPIC = "amq.topic"
+const SUFFIX_EX = "-ex"
+const SUFFIX_DLQ = "-dlq"
+const SUFFIX_DLEX = "-dlex"
+const CONFIG_QUEUE_EVENTS = "events"
+const X_DEAD_LETTER_EXCHANGE = "x-dead-letter-exchange"
 
 func Setup(ctx context.Context) error {
 	mqttBroker := utils.MqttBroker
@@ -25,7 +30,7 @@ func Setup(ctx context.Context) error {
 
 	topicBroadcast := topics.Broadcast
 	topicEvents := topics.Events
-	queueEvents := queues.Events
+	queueEvents := queues[CONFIG_QUEUE_EVENTS]
 	routingKeyEvents := getRoutingKey(topicEvents)
 
 	err := mqttBroker.Subscribe(ctx, topicBroadcast, onMqttBroadCastMessageReceived)
@@ -33,12 +38,44 @@ func Setup(ctx context.Context) error {
 		return err
 	}
 
-	err = rabbitMqBroker.CreateQueue(ctx, queueEvents)
+	queue := queueEvents.Name
+	dlqQueue := queue + SUFFIX_DLQ
+	dlExchange := queue + SUFFIX_DLEX
+	requeueExchange := queueEvents.RequeueDelayExchange
+
+	err = rabbitMqBroker.CreateQueue(ctx, dlqQueue, nil)
 	if err != nil {
 		return err
 	}
 
-	err = rabbitMqBroker.Bind(ctx, queueEvents, routingKeyEvents, AMQ_TOPIC)
+	err = rabbitMqBroker.CreateExchange(ctx, dlExchange)
+	if err != nil {
+		return err
+	}
+
+	err = rabbitMqBroker.Bind(ctx, dlqQueue, constants.HASH, dlExchange)
+	if err != nil {
+		return err
+	}
+
+	queueArgs := make(map[string]any)
+	queueArgs[X_DEAD_LETTER_EXCHANGE] = dlExchange
+	err = rabbitMqBroker.CreateQueue(ctx, queue, queueArgs)
+	if err != nil {
+		return err
+	}
+
+	err = rabbitMqBroker.CreateDelayedExchange(ctx, requeueExchange)
+	if err != nil {
+		return err
+	}
+
+	err = rabbitMqBroker.Bind(ctx, queue, queue, requeueExchange)
+	if err != nil {
+		return err
+	}
+
+	err = rabbitMqBroker.Bind(ctx, queue, routingKeyEvents, AMQ_TOPIC)
 	if err != nil {
 		return err
 	}
@@ -51,8 +88,7 @@ func Setup(ctx context.Context) error {
 	return nil
 }
 
-func onRabbitMqEventMessageReceived(queue string, delivery amqp.Delivery) error {
-	ctx := context.Background()
+func onRabbitMqEventMessageReceived(ctx context.Context, queue string, delivery amqp.Delivery) error {
 	defer log.HandlePanic(ctx)
 
 	eventService := service.GetEventService[*entity.Event]()

@@ -47,8 +47,8 @@ func (service Service[T]) Get(ctx context.Context, id string) (T, *exceptions.Wr
 	return service.repository.Get(ctx, id)
 }
 
-func (service Service[T]) GetAll(ctx context.Context) ([]T, *exceptions.WrappedError) {
-	return service.repository.GetAll(ctx)
+func (service Service[T]) GetAll(ctx context.Context, page int, limit int) ([]T, *exceptions.WrappedError) {
+	return service.repository.GetAll(ctx, page, limit)
 }
 
 func (service Service[T]) Save(ctx context.Context, entity T) *exceptions.WrappedError {

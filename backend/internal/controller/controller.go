@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"reflect"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -31,6 +32,9 @@ type IController[T entity.IEntity, RQ any] interface {
 	Patch(ginCtx *gin.Context)
 	Head(ginCtx *gin.Context)
 }
+
+const HEADER_PAGE = "page"
+const HEADER_LIMIT = "limit"
 
 var controllers map[string]any
 var controllerMutex sync.Mutex
@@ -78,10 +82,39 @@ func GetController[T entity.IEntity, RQ any](service service_port.IService[T]) C
 
 func (controller Controller[T, RQ]) Get(ginCtx *gin.Context) {
 	ctx := GetContext(ginCtx)
+	pageStr, errw := GetQuery(ginCtx, HEADER_PAGE, true)
+	if errw != nil {
+		HandleError(ctx, ginCtx, errw)
+		return
+	}
 
-	devices, err := controller.service.GetAll(ctx)
+	limitStr, errw := GetQuery(ginCtx, HEADER_LIMIT, true)
+	if errw != nil {
+		HandleError(ctx, ginCtx, errw)
+		return
+	}
+
+	page, err := strconv.Atoi(pageStr)
 	if err != nil {
-		HandleError(ctx, ginCtx, err)
+		HandleError(ctx, ginCtx, &exceptions.WrappedError{
+			BaseError: exceptions.InvalidParameterFormat,
+			Error:     err,
+		})
+		return
+	}
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		HandleError(ctx, ginCtx, &exceptions.WrappedError{
+			BaseError: exceptions.InvalidParameterFormat,
+			Error:     err,
+		})
+		return
+	}
+
+	devices, errw := controller.service.GetAll(ctx, page, limit)
+	if errw != nil {
+		HandleError(ctx, ginCtx, errw)
 		return
 	}
 
@@ -90,7 +123,11 @@ func (controller Controller[T, RQ]) Get(ginCtx *gin.Context) {
 
 func (controller Controller[T, RQ]) GetById(ginCtx *gin.Context) {
 	ctx := GetContext(ginCtx)
-	id := ginCtx.Param("id")
+	id, err := GetParameter(ginCtx, constants.ID, true)
+	if err != nil {
+		HandleError(ctx, ginCtx, err)
+		return
+	}
 
 	device, err := controller.service.Get(ctx, id)
 	if err != nil {
@@ -102,7 +139,13 @@ func (controller Controller[T, RQ]) GetById(ginCtx *gin.Context) {
 }
 
 func (controller Controller[T, RQ]) Post(ginCtx *gin.Context) {
-	id := ginCtx.Param(constants.ID)
+	ctx := GetContext(ginCtx)
+	id, err := GetParameter(ginCtx, constants.ID, true)
+	if err != nil {
+		HandleError(ctx, ginCtx, err)
+		return
+	}
+
 	controller.save(ginCtx, &id, false)
 }
 
@@ -111,13 +154,23 @@ func (controller Controller[T, RQ]) Put(ginCtx *gin.Context) {
 }
 
 func (controller Controller[T, RQ]) PutById(ginCtx *gin.Context) {
-	id := ginCtx.Param(constants.ID)
+	ctx := GetContext(ginCtx)
+	id, err := GetParameter(ginCtx, constants.ID, true)
+	if err != nil {
+		HandleError(ctx, ginCtx, err)
+		return
+	}
+
 	controller.save(ginCtx, &id, true)
 }
 
 func (controller Controller[T, RQ]) DeleteById(ginCtx *gin.Context) {
 	ctx := GetContext(ginCtx)
-	id := ginCtx.Param("id")
+	id, err := GetParameter(ginCtx, constants.ID, true)
+	if err != nil {
+		HandleError(ctx, ginCtx, err)
+		return
+	}
 
 	device, err := controller.service.Get(ctx, id)
 	if err != nil {
@@ -189,7 +242,11 @@ func (controller Controller[T, RQ]) save(ginCtx *gin.Context, id *string, overri
 
 func (controller Controller[T, RQ]) Patch(ginCtx *gin.Context) {
 	ctx := GetContext(ginCtx)
-	id := ginCtx.Param("id")
+	id, errw := GetParameter(ginCtx, constants.ID, true)
+	if errw != nil {
+		HandleError(ctx, ginCtx, errw)
+		return
+	}
 
 	var jsonData map[string]any
 	err := ginCtx.ShouldBindJSON(&jsonData)
@@ -217,7 +274,7 @@ func (controller Controller[T, RQ]) Patch(ginCtx *gin.Context) {
 		fieldType := entityType.Field(i)
 		fieldValue := entityValue.Field(i)
 		fieldJsonTag := fieldType.Tag.Get("json")
-		jsonTag := strings.Replace(fieldJsonTag, ",omitempty", constants.EMPTY, -1)
+		jsonTag := strings.Replace(fieldJsonTag, ",omitempty", constants.EMPTY, constants.MINUS_ONE)
 
 		value := jsonData[jsonTag]
 		if value != nil {
@@ -237,7 +294,11 @@ func (controller Controller[T, RQ]) Patch(ginCtx *gin.Context) {
 
 func (controller Controller[T, RQ]) Head(ginCtx *gin.Context) {
 	ctx := GetContext(ginCtx)
-	id := ginCtx.Param("id")
+	id, err := GetParameter(ginCtx, constants.ID, true)
+	if err != nil {
+		HandleError(ctx, ginCtx, err)
+		return
+	}
 
 	service := controller.service
 
@@ -254,17 +315,43 @@ func GetContext(ginCtx *gin.Context) context.Context {
 	return ginCtx.Request.Context()
 }
 
-func GetHeader(ctx *gin.Context, name string, required bool) (string, *exceptions.WrappedError) {
-	header := ctx.Request.Header.Get(name)
+func GetHeader(ginCtx *gin.Context, name string, required bool) (string, *exceptions.WrappedError) {
+	header := ginCtx.Request.Header.Get(name)
 
 	if utils.IsEmptyStr(header) && required {
 		return header, &exceptions.WrappedError{
-			Message:   "Header [" + name + "] não encontrado",
+			Message:   "Header [" + name + "] not found",
 			BaseError: exceptions.HeaderNotFound,
 		}
 	}
 
 	return header, nil
+}
+
+func GetParameter(ginCtx *gin.Context, name string, required bool) (string, *exceptions.WrappedError) {
+	parameter := ginCtx.Param(name)
+
+	if utils.IsEmptyStr(parameter) && required {
+		return parameter, &exceptions.WrappedError{
+			Message:   "Parameter [" + name + "] not found",
+			BaseError: exceptions.ParameterNotFound,
+		}
+	}
+
+	return parameter, nil
+}
+
+func GetQuery(ginCtx *gin.Context, name string, required bool) (string, *exceptions.WrappedError) {
+	query := ginCtx.Query(name)
+
+	if utils.IsEmptyStr(query) && required {
+		return query, &exceptions.WrappedError{
+			Message:   "Query [" + name + "] not found",
+			BaseError: exceptions.QueryNotFound,
+		}
+	}
+
+	return query, nil
 }
 
 func HandleError(ctx context.Context, ginCtx *gin.Context, err *exceptions.WrappedError) {

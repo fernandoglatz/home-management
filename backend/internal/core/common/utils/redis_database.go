@@ -38,7 +38,7 @@ func ConnectToRedis(ctx context.Context) error {
 	err := cmd.Err()
 
 	if err == nil {
-		log.Info(ctx).Msg("Redis connected")
+		log.Info(ctx).Msg("Redis connected!")
 	}
 
 	return err

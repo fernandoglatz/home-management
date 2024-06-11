@@ -63,9 +63,7 @@ type Config struct {
 			User     string `yaml:"user"`
 			Password string `yaml:"password"`
 
-			Queues struct {
-				Events string `yaml:"events"`
-			} `yaml:"queues"`
+			Queues map[string]Queue `yaml:"queues"`
 		} `yaml:"rabbitmq"`
 	} `yaml:"broker"`
 
@@ -74,6 +72,13 @@ type Config struct {
 		Format  format.Format `yaml:"format"`
 		Colored bool          `yaml:"colored"`
 	} `yaml:"log"`
+}
+
+type Queue struct {
+	Name                 string        `yaml:"name"`
+	MaximumReceives      int           `yaml:"maximum-receives"`
+	RequeueDelay         time.Duration `yaml:"requeue-delay"`
+	RequeueDelayExchange string        `yaml:"requeue-delay-exchange"`
 }
 
 var ApplicationConfig Config

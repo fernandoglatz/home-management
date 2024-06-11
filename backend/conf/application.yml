@@ -34,7 +34,11 @@ broker:
   rabbitmq:
     uri: "amqp://guest:guest@localhost:5672/"
     queues:
-      events: "home-management-events"
+      events:
+        name: "home-management-events"
+        maximum-receives: 5
+        requeue-delay: 10s
+        requeue-delay-exchange: "home-management-events-requeue"
 
 log:
   level: INFO

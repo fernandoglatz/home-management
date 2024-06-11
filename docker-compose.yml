@@ -43,13 +43,13 @@ services:
         max-size: "50m"
 
   rabbitmq:
-    image: "rabbitmq:3-management"
+    build: ./rabbitmq
     hostname: rabbitmq
     ports:
       - "1883:1883"
       - "5672:5672"
       - "15672:15672"
-    command: '/bin/bash -c "rabbitmq-plugins enable --offline rabbitmq_mqtt; rabbitmq-server"'
+    command: '/bin/bash -c "rabbitmq-plugins enable rabbitmq_mqtt; rabbitmq-plugins enable rabbitmq_delayed_message_exchange; rabbitmq-server"'
     environment:
       - TZ=${TZ}
     volumes:

@@ -14,7 +14,10 @@ import (
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+const CREATED_AT = "createdAt"
 
 var repositories map[string]any
 var repositoryMutex sync.Mutex
@@ -49,7 +52,7 @@ func GetGenericRepository[T entity.IEntity]() Repository[T] {
 }
 
 func (repository Repository[T]) Get(ctx context.Context, id string) (T, *exceptions.WrappedError) {
-	filter := bson.M{"id": id}
+	filter := bson.M{constants.ID: id}
 	return repository.getByFilter(ctx, filter)
 }
 
@@ -71,10 +74,19 @@ func (repository Repository[T]) getByFilter(ctx context.Context, filter any) (T,
 	return entity, nil
 }
 
-func (repository Repository[T]) GetAll(ctx context.Context) ([]T, *exceptions.WrappedError) {
+func (repository Repository[T]) GetAll(ctx context.Context, page int, limit int) ([]T, *exceptions.WrappedError) {
 	var entities []T = []T{}
 
-	cursor, err := repository.collection.Find(ctx, bson.M{})
+	skip := (page - constants.ONE) * limit
+
+	filter := bson.D{}
+
+	findOptions := options.Find()
+	findOptions.SetSkip(int64(skip))
+	findOptions.SetLimit(int64(limit))
+	findOptions.SetSort(bson.M{constants.ID: constants.MINUS_ONE})
+
+	cursor, err := repository.collection.Find(ctx, filter, findOptions)
 	if err != nil {
 		return entities, &exceptions.WrappedError{
 			Error: err,
@@ -106,7 +118,7 @@ func (repository Repository[T]) Save(ctx context.Context, entity T) *exceptions.
 	if len(entity.GetID()) == constants.ZERO {
 		uuidObj, _ := uuid.NewRandom()
 		uuidStr := uuidObj.String()
-		entity.SetID(strings.Replace(uuidStr, "-", constants.EMPTY, -1))
+		entity.SetID(strings.Replace(uuidStr, "-", constants.EMPTY, constants.MINUS_ONE))
 	}
 
 	var err error
@@ -115,7 +127,7 @@ func (repository Repository[T]) Save(ctx context.Context, entity T) *exceptions.
 		entity.SetCreatedAt(now)
 		_, err = repository.collection.InsertOne(ctx, entity)
 	} else {
-		filter := bson.M{"id": entity.GetID()}
+		filter := bson.M{constants.ID: entity.GetID()}
 		_, err = repository.collection.ReplaceOne(ctx, filter, entity)
 	}
 
@@ -136,7 +148,7 @@ func (repository Repository[T]) Save(ctx context.Context, entity T) *exceptions.
 }
 
 func (repository Repository[T]) Remove(ctx context.Context, entity T) *exceptions.WrappedError {
-	filter := bson.M{"id": entity.GetID()}
+	filter := bson.M{constants.ID: entity.GetID()}
 	_, err := repository.collection.DeleteOne(ctx, filter)
 	if err != nil {
 		return &exceptions.WrappedError{

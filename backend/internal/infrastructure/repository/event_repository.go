@@ -54,11 +54,13 @@ func (eventRepository EventRepository[T]) Get(ctx context.Context, id string) (T
 	return entity, err
 }
 
-func (eventRepository EventRepository[T]) GetAll(ctx context.Context) ([]T, *exceptions.WrappedError) {
-	entities, err := eventRepository.repository.GetAll(ctx)
+func (eventRepository EventRepository[T]) GetAll(ctx context.Context, page int, limit int) ([]T, *exceptions.WrappedError) {
+	entities, err := eventRepository.repository.GetAll(ctx, page, limit)
 
-	for _, entity := range entities {
-		eventRepository.CorrecTimezone(entity)
+	if err == nil {
+		for _, entity := range entities {
+			eventRepository.CorrecTimezone(entity)
+		}
 	}
 
 	return entities, err

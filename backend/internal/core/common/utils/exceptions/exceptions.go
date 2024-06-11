@@ -15,6 +15,26 @@ var (
 		Code:    "HEADER_NOT_FOUND",
 		Message: "Header not found.",
 	}
+	QueryNotFound = BaseError{
+		Code:    "QUERY_NOT_FOUND",
+		Message: "Query not found.",
+	}
+	ParameterNotFound = BaseError{
+		Code:    "PARAMETER_NOT_FOUND",
+		Message: "Parameter not found.",
+	}
+	InvalidHeaderFormat = BaseError{
+		Code:    "INVALID_HEADER_FORMAT",
+		Message: "Invalid header format.",
+	}
+	InvalidQueryFormat = BaseError{
+		Code:    "INVALID_QUERY_FORMAT",
+		Message: "Invalid query format.",
+	}
+	InvalidParameterFormat = BaseError{
+		Code:    "INVALID_PARAMETER_FORMAT",
+		Message: "Invalid parameter format.",
+	}
 	InvalidJSON = BaseError{
 		Code:    "INVALID_JSON",
 		Message: "Invalid JSON.",
@@ -22,10 +42,6 @@ var (
 	DuplicatedRecord = BaseError{
 		Code:    "DUPLICATED_RECORD",
 		Message: "Record duplicated.",
-	}
-	WakeOnLanError = BaseError{
-		Code:    "WAKE_ON_LAN_ERROR",
-		Message: "Erro on waking up device",
 	}
 )
 
