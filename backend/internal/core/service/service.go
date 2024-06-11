@@ -19,6 +19,11 @@ type Service[T entity.IEntity] struct {
 }
 
 func GetGenericService[T entity.IEntity]() Service[T] {
+	repository := repository.GetGenericRepository[T]()
+	return GetService[T](repository)
+}
+
+func GetService[T entity.IEntity](repository repository_port.IRepository[T]) Service[T] {
 	var entity T
 	typeName := utils.GetTypeName(entity)
 
@@ -32,9 +37,8 @@ func GetGenericService[T entity.IEntity]() Service[T] {
 	service := services[typeName]
 
 	if service == nil {
-		repository := repository.GetGenericRepository[T]()
 		service = Service[T]{
-			repository: &repository,
+			repository: repository,
 		}
 
 		services[typeName] = service

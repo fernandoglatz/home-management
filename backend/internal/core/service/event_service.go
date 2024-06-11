@@ -43,8 +43,8 @@ func GetEventService[T entity.IEvent]() EventService[T] {
 	eventService := eventServices[typeName]
 
 	if eventService == nil {
-		service := GetGenericService[T]()
 		repository := repository.GetEventRepository[T]()
+		service := GetService[T](repository)
 
 		eventService = EventService[T]{
 			service:    service,

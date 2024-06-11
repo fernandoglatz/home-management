@@ -24,7 +24,7 @@ func GetEventController[T entity.IEvent, RQ request.EventRequest]() EventControl
 		eventService := service.GetEventService[T]()
 
 		eventController = EventController[T, RQ]{
-			controller: GetController[T, RQ](&eventService),
+			controller: GetController[T, RQ](eventService),
 		}
 	}
 
