@@ -29,7 +29,7 @@ services:
 
   redis:
     image: redis:7
-    hostname: redis
+    hostname: home-management-redis
     ports:
       - "6379:6379"
     volumes:
@@ -44,12 +44,11 @@ services:
 
   rabbitmq:
     build: ./rabbitmq
-    hostname: rabbitmq
+    hostname: home-management-rabbitmq
     ports:
       - "1883:1883"
       - "5672:5672"
       - "15672:15672"
-    command: '/bin/bash -c "rabbitmq-plugins enable rabbitmq_mqtt; rabbitmq-plugins enable rabbitmq_delayed_message_exchange; rabbitmq-server"'
     environment:
       - TZ=${TZ}
     volumes:
@@ -63,7 +62,5 @@ services:
 
 volumes:
   mongodb-data:
-  mosquitto-data:
-  mosquitto-log:
   rabbitmq-data:
   redis-data:

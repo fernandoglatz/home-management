@@ -84,7 +84,7 @@ func (repository Repository[T]) GetAll(ctx context.Context, page int, limit int)
 	findOptions := options.Find()
 	findOptions.SetSkip(int64(skip))
 	findOptions.SetLimit(int64(limit))
-	findOptions.SetSort(bson.M{constants.ID: constants.MINUS_ONE})
+	findOptions.SetSort(bson.M{CREATED_AT: constants.MINUS_ONE})
 
 	cursor, err := repository.collection.Find(ctx, filter, findOptions)
 	if err != nil {
