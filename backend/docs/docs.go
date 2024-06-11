@@ -42,6 +42,23 @@ const docTemplate = `{
                         "name": "limit",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "enum": [
+                            "RECEIVED_RF",
+                            "SEND_RF",
+                            "MQTT_CONNECTED",
+                            "RESTART",
+                            "RESET",
+                            "SET_CONFIG",
+                            "GET_CONFIG",
+                            "GET_INFO",
+                            "ACTION_UNRECOGNIZED"
+                        ],
+                        "type": "string",
+                        "description": "type",
+                        "name": "type",
+                        "in": "query"
                     }
                 ],
                 "responses": {

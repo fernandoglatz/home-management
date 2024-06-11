@@ -33,8 +33,8 @@ type IController[T entity.IEntity, RQ any] interface {
 	Head(ginCtx *gin.Context)
 }
 
-const HEADER_PAGE = "page"
-const HEADER_LIMIT = "limit"
+const QUERY_PAGE = "page"
+const QUERY_LIMIT = "limit"
 
 var controllers map[string]any
 var controllerMutex sync.Mutex
@@ -82,13 +82,13 @@ func GetController[T entity.IEntity, RQ any](service service_port.IService[T]) C
 
 func (controller Controller[T, RQ]) Get(ginCtx *gin.Context) {
 	ctx := GetContext(ginCtx)
-	pageStr, errw := GetQuery(ginCtx, HEADER_PAGE, true)
+	pageStr, errw := GetQuery(ginCtx, QUERY_PAGE, true)
 	if errw != nil {
 		HandleError(ctx, ginCtx, errw)
 		return
 	}
 
-	limitStr, errw := GetQuery(ginCtx, HEADER_LIMIT, true)
+	limitStr, errw := GetQuery(ginCtx, QUERY_LIMIT, true)
 	if errw != nil {
 		HandleError(ctx, ginCtx, errw)
 		return
@@ -112,13 +112,13 @@ func (controller Controller[T, RQ]) Get(ginCtx *gin.Context) {
 		return
 	}
 
-	devices, errw := controller.service.GetAll(ctx, page, limit)
+	entities, errw := controller.service.GetAll(ctx, page, limit)
 	if errw != nil {
 		HandleError(ctx, ginCtx, errw)
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, devices)
+	ginCtx.JSON(http.StatusOK, entities)
 }
 
 func (controller Controller[T, RQ]) GetById(ginCtx *gin.Context) {
@@ -129,13 +129,13 @@ func (controller Controller[T, RQ]) GetById(ginCtx *gin.Context) {
 		return
 	}
 
-	device, err := controller.service.Get(ctx, id)
+	entity, err := controller.service.Get(ctx, id)
 	if err != nil {
 		HandleError(ctx, ginCtx, err)
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, device)
+	ginCtx.JSON(http.StatusOK, entity)
 }
 
 func (controller Controller[T, RQ]) Post(ginCtx *gin.Context) {
@@ -172,13 +172,13 @@ func (controller Controller[T, RQ]) DeleteById(ginCtx *gin.Context) {
 		return
 	}
 
-	device, err := controller.service.Get(ctx, id)
+	entity, err := controller.service.Get(ctx, id)
 	if err != nil {
 		HandleError(ctx, ginCtx, err)
 		return
 	}
 
-	err = controller.service.Remove(ctx, device)
+	err = controller.service.Remove(ctx, entity)
 	if err != nil {
 		HandleError(ctx, ginCtx, err)
 	} else {

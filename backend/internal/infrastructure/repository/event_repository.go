@@ -3,12 +3,14 @@ package repository
 import (
 	"context"
 	"fernandoglatz/home-management/internal/core/common/utils"
+	"fernandoglatz/home-management/internal/core/common/utils/constants"
 	"fernandoglatz/home-management/internal/core/common/utils/exceptions"
 	"fernandoglatz/home-management/internal/core/entity"
 	"sync"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var eventRepositories map[string]any
@@ -96,8 +98,10 @@ func (eventRepository EventRepository[T]) GetRfEvents(ctx context.Context, code 
 			"$lte": endDate,
 		},
 	}
+	findOptions := options.Find()
+	findOptions.SetSort(bson.M{CREATED_AT: constants.MINUS_ONE})
 
-	cursor, err := rfEventRepository.repository.collection.Find(ctx, filter)
+	cursor, err := rfEventRepository.repository.collection.Find(ctx, filter, findOptions)
 	if err != nil {
 		return events, &exceptions.WrappedError{
 			Error: err,

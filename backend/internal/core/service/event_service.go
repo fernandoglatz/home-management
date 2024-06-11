@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fernandoglatz/home-management/internal/core/common/utils"
+	"fernandoglatz/home-management/internal/core/common/utils/constants"
 	"fernandoglatz/home-management/internal/core/common/utils/exceptions"
 	"fernandoglatz/home-management/internal/core/common/utils/log"
 	"fernandoglatz/home-management/internal/core/entity"
@@ -120,8 +121,10 @@ func (eventService EventService[T]) processRfEvent(ctx context.Context, body []b
 	processRfMessageMutex.Lock()
 	defer processRfMessageMutex.Unlock()
 
+	rfEventService := GetEventService[*entity.RfEvent]()
+
 	var rfEventMessage message.RfEventMessage
-	var lastRfEventMessage message.RfEventMessage
+	var lastRfEvent entity.RfEvent
 
 	err := json.Unmarshal(body, &rfEventMessage)
 	if err != nil {
@@ -133,20 +136,15 @@ func (eventService EventService[T]) processRfEvent(ctx context.Context, body []b
 
 	ttl := config.ApplicationConfig.Data.Redis.TTL.RfEvent
 	redisKey := fmt.Sprintf("%s%d-%d-%d-%d", REDIS_RF_EVENT_PREFIX, rfEventMessage.Code, rfEventMessage.Bits, rfEventMessage.Protocol, rfEventMessage.Frequency)
-	err = utils.RedisDatabase.GetStruct(ctx, redisKey, &lastRfEventMessage)
+	err = utils.RedisDatabase.GetStruct(ctx, redisKey, &lastRfEvent)
 
 	if err != nil && err != redis.Nil {
 		log.Error(ctx).Msg("Error on retrieving RF event from redis: " + err.Error())
 	}
 
-	err = utils.RedisDatabase.SetStruct(ctx, redisKey, rfEventMessage, ttl)
-	if err != nil {
-		log.Error(ctx).Msg("Error on putting RF event on redis: " + err.Error())
-	}
-
 	mergePeriod := config.ApplicationConfig.Application.Processing.RfEvents.MergePeriod
 	currentDate := rfEventMessage.Date
-	lastDate := lastRfEventMessage.Date
+	lastDate := lastRfEvent.Date
 
 	if lastDate.IsZero() {
 		startDate := currentDate.Add(-mergePeriod)
@@ -157,7 +155,8 @@ func (eventService EventService[T]) processRfEvent(ctx context.Context, body []b
 		}
 
 		for _, event := range events {
-			lastDate = event.Date
+			lastRfEvent = event
+			lastDate = lastRfEvent.Date
 			break
 		}
 	}
@@ -165,7 +164,7 @@ func (eventService EventService[T]) processRfEvent(ctx context.Context, body []b
 	diff := currentDate.Sub(lastDate)
 
 	if diff > mergePeriod {
-		event := &entity.RfEvent{
+		newEvent := entity.RfEvent{
 			Code:             rfEventMessage.Code,
 			Bits:             rfEventMessage.Bits,
 			Protocol:         rfEventMessage.Protocol,
@@ -173,14 +172,21 @@ func (eventService EventService[T]) processRfEvent(ctx context.Context, body []b
 			ReceiveTolerance: rfEventMessage.ReceiveTolerance,
 		}
 
-		defaultEventService := GetEventService[*entity.RfEvent]()
-		defaultEventService.populateEvent(&event.Event, rfEventMessage.EventMessage)
-
-		return defaultEventService.Save(ctx, event)
-
-	} else {
-		log.Warn(ctx).Msg("Ignoring RF event, duplicated: " + redisKey)
+		rfEventService.populateEvent(&newEvent.Event, rfEventMessage.EventMessage)
+		lastRfEvent = newEvent
 	}
 
-	return nil
+	lastRfEvent.ReceiveCount = lastRfEvent.ReceiveCount + constants.ONE
+
+	errw := rfEventService.Save(ctx, &lastRfEvent)
+	if errw != nil {
+		log.Error(ctx).Msg("Error on saving RF event: " + err.Error())
+	}
+
+	err = utils.RedisDatabase.SetStruct(ctx, redisKey, lastRfEvent, ttl)
+	if err != nil {
+		log.Error(ctx).Msg("Error on putting RF event on redis: " + err.Error())
+	}
+
+	return errw
 }

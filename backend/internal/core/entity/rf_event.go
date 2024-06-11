@@ -7,6 +7,7 @@ type RfEvent struct {
 	Bits             int `json:"bits" bson:"bits"`
 	Protocol         int `json:"protocol" bson:"protocol"`
 	ReceiveTolerance int `json:"receiveTolerance" bson:"receiveTolerance"`
+	ReceiveCount     int `json:"receiveCount" bson:"receiveCount"`
 }
 
 func (event RfEvent) GetCollectionName() string {

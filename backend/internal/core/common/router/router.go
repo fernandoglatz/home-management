@@ -22,7 +22,7 @@ func Setup(ctx context.Context, engine *gin.Engine) {
 	router := engine.Group(contextPath)
 
 	healthController := controller.NewHealthController()
-	eventController := controller.GetEventController[*entity.RfEvent, request.EventRequest]()
+	eventController := controller.GetEventController[*entity.Event, request.EventRequest]()
 
 	routerEvent := router.Group("/event")
 	routerEvent.GET(constants.EMPTY, eventController.Get)

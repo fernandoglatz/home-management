@@ -3,6 +3,7 @@ package controller
 import (
 	"fernandoglatz/home-management/internal/core/common/utils"
 	"fernandoglatz/home-management/internal/core/entity"
+	"fernandoglatz/home-management/internal/core/entity/event"
 	"fernandoglatz/home-management/internal/core/model/request"
 	"fernandoglatz/home-management/internal/core/service"
 	"sync"
@@ -10,11 +11,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const QUERY_TYPE = "type"
+
 var eventControllers map[string]any
 var eventControllerMutex sync.Mutex
 
 type EventController[T entity.IEvent, RQ request.EventRequest] struct {
 	controller Controller[T, RQ]
+	service    service.EventService[T]
 }
 
 func GetEventController[T entity.IEvent, RQ request.EventRequest]() EventController[T, RQ] {
@@ -35,6 +39,7 @@ func GetEventController[T entity.IEvent, RQ request.EventRequest]() EventControl
 
 		eventController = EventController[T, RQ]{
 			controller: GetController[T, RQ](eventService),
+			service:    eventService,
 		}
 
 		eventControllers[typeName] = eventController
@@ -47,13 +52,28 @@ func GetEventController[T entity.IEvent, RQ request.EventRequest]() EventControl
 // @Summary	Get events
 // @Param	page		query	string  true "page"
 // @Param	limit		query	string  true "limit"
+// @Param	type		query	event.Type  false "type"
 // @Produce	json
 // @Success	200	{array}		entity.Event
 // @Failure	400	{object}	response.Response
 // @Failure	500	{object}	response.Response
 // @Router	/event [get]
 func (eventController EventController[T, RQ]) Get(ginCtx *gin.Context) {
-	eventController.controller.Get(ginCtx)
+	ctx := GetContext(ginCtx)
+	typeStr, errw := GetQuery(ginCtx, QUERY_TYPE, false)
+	if errw != nil {
+		HandleError(ctx, ginCtx, errw)
+		return
+	}
+
+	eventType := event.GetType(typeStr)
+	switch eventType {
+	case event.RECEIVED_RF:
+		controller := GetEventController[*entity.RfEvent, request.EventRequest]()
+		controller.controller.Get(ginCtx)
+	default:
+		eventController.controller.Get(ginCtx)
+	}
 }
 
 // @Tags	event

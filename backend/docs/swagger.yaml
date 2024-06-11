@@ -82,6 +82,20 @@ paths:
         name: limit
         required: true
         type: string
+      - description: type
+        enum:
+        - RECEIVED_RF
+        - SEND_RF
+        - MQTT_CONNECTED
+        - RESTART
+        - RESET
+        - SET_CONFIG
+        - GET_CONFIG
+        - GET_INFO
+        - ACTION_UNRECOGNIZED
+        in: query
+        name: type
+        type: string
       produces:
       - application/json
       responses:
