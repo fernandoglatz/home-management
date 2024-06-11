@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fernandoglatz/home-management/internal/core/common/utils"
 	"fernandoglatz/home-management/internal/core/entity"
 	"fernandoglatz/home-management/internal/core/model/request"
 	"fernandoglatz/home-management/internal/core/service"
@@ -9,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var eventController any
+var eventControllers map[string]any
 var eventControllerMutex sync.Mutex
 
 type EventController[T entity.IEvent, RQ request.EventRequest] struct {
@@ -17,8 +18,17 @@ type EventController[T entity.IEvent, RQ request.EventRequest] struct {
 }
 
 func GetEventController[T entity.IEvent, RQ request.EventRequest]() EventController[T, RQ] {
+	entity := utils.Instance[T]()
+	typeName := utils.GetTypeName(entity)
+
 	eventControllerMutex.Lock()
 	defer eventControllerMutex.Unlock()
+
+	if eventControllers == nil {
+		eventControllers = make(map[string]any)
+	}
+
+	eventController := eventControllers[typeName]
 
 	if eventController == nil {
 		eventService := service.GetEventService[T]()
@@ -26,6 +36,8 @@ func GetEventController[T entity.IEvent, RQ request.EventRequest]() EventControl
 		eventController = EventController[T, RQ]{
 			controller: GetController[T, RQ](eventService),
 		}
+
+		eventControllers[typeName] = eventController
 	}
 
 	return eventController.(EventController[T, RQ])
