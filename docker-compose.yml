@@ -49,12 +49,13 @@ services:
       - "1883:1883"
       - "5672:5672"
       - "15672:15672"
-    environment:
-      - TZ=${TZ}
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
       - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
     logging:
       driver: "json-file"
       options:
