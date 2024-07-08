@@ -188,7 +188,7 @@ void sendMqttConnectedMessage() {
 
 bool mqttConnect() {
     bool connected = false;
-    if (WiFi.isConnected() && !mqttClient.connected()) {
+    while (WiFi.isConnected() && !mqttClient.connected()) {
         logInfo("MQTT connecting...");
 
         mqttClient.setServer(MQTT_HOST, MQTT_PORT);
